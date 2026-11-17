@@ -1,7 +1,3 @@
 "use client";
-import GenericTask from "@/components/GenericTask";
-
-export default function Page() {
-  return <GenericTask taskKey="odd" title="Odd One Out" intro="Tap the one item that differs." total={25} dur={1200} />;
-}
-
+import { SearchGame } from "@/components/engines";
+export default function Page() { return <SearchGame taskKey="odd" title="Odd One Out" intro="Tap the one item that differs. Tests visual discrimination." kind="odd" />; }
