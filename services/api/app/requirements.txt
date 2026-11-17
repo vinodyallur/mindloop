@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+scikit-learn
+xgboost
+shap
+numpy
+pandas
+scipy
+onnxruntime
+fhir.resources
