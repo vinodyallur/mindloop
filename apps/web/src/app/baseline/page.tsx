@@ -1,0 +1,115 @@
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from "recharts";
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const KEY = process.env.NEXT_PUBLIC_API_KEY || "demo-key-change-me";
+const req = (p: string) => fetch(`${API}${p}`, { headers: { "x-api-key": KEY } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+
+function band(v: number) {
+  if (v >= 70) return { label: "Above your usual", cls: "text-emerald-700" };
+  if (v >= 40) return { label: "Around your usual", cls: "text-neutral-600" };
+  return { label: "Below your usual", cls: "text-amber-700" };
+}
+
+export default function Baseline() {
+  const [data, setData] = useState<any>(null);
+  const [task, setTask] = useState("");
+  const [metric, setMetric] = useState("");
+  useEffect(() => {
+    const q = `?task_key=${task}&metric_key=${metric}&window=30`;
+    req(`/api/v1/baseline/index${q}`).then(setData);
+    req("/api/v1/baseline/forecast").then((f) => f && setData((d: any) => (d ? { ...d, forecast: f } : d)));
+  }, [task, metric]);
+  const series = useMemo(() => (data?.series || []).map((s: any, i: number) => ({ i: i + 1, index: s.index, task: s.task_key })), [data]);
+  const tasks = useMemo(() => Array.from(new Set((data?.series || []).map((s: any) => s.task_key as string))), [data]);
+  const idx = data?.index;
+  const b = idx != null ? band(idx) : null;
+  return (
+    <main className="mx-auto max-w-5xl space-y-6 px-5 py-8">
+      <header>
+        <p className="text-xs font-medium uppercase tracking-widest text-neutral-400">Personal baseline</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight">Your Index</h1>
+        <p className="mt-1 max-w-xl text-sm text-neutral-500">0 = far below your usual pattern · 50 = at your baseline median · 100 = far above. Descriptive only — never a diagnosis.</p>
+      </header>
+
+      <div className="flex flex-wrap gap-2">
+        <select value={task} onChange={(e) => setTask(e.target.value)} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm">
+          <option value="">All tasks</option>
+          {tasks.map((t) => <option key={String(t)} value={String(t)}>{String(t)}</option>)}
+        </select>
+        <select value={metric} onChange={(e) => setMetric(e.target.value)} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm">
+          <option value="">All metrics</option>
+          {["accuracy", "median_rt_ms", "rt_variability_ms", "omissions", "commissions", "hit_rate", "steadiness_score", "sway_variability"].map((m) => <option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
+
+      <section className="card flex flex-col items-center gap-2 p-8">
+        {idx != null ? (
+          <>
+            <div className="relative h-44 w-44">
+              <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                <circle cx="50" cy="50" r="42" fill="none" strokeWidth="9" className="stroke-neutral-200" />
+                <circle cx="50" cy="50" r="42" fill="none" strokeWidth="9" strokeLinecap="round" className="stroke-neutral-900 transition-all duration-700" strokeDasharray={`${(idx / 100) * 263.9} 263.9`} />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-5xl font-semibold tabular-nums tracking-tight">{Math.round(idx)}</span>
+                <span className="text-xs text-neutral-400">/ 100</span>
+              </div>
+            </div>
+            <p className={`text-sm font-medium ${b!.cls}`}>{b!.label}</p>
+            {data?.trend_delta != null && <p className="text-xs text-neutral-400">Trend {data.trend_delta >= 0 ? "+" : ""}{data.trend_delta} vs earlier half · {data.sessions} sessions · {data.confidence}</p>}
+          </>
+        ) : <p className="py-8 text-sm text-neutral-500">Complete a few tasks to build your baseline — 3–5 valid sessions across days.</p>}
+      </section>
+
+      {series.length > 1 && (
+        <section className="card p-5">
+          <h2 className="text-sm font-semibold">Index over sessions</h2>
+          <ResponsiveContainer width="100%" height={240}>
+            <LineChart data={series} margin={{ top: 12, right: 12, left: -18, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <XAxis dataKey="i" tick={{ fontSize: 11 }} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <ReferenceArea y1={40} y2={70} fill="#f5f5f4" />
+              <Line type="monotone" dataKey="index" stroke="#1a1a1a" strokeWidth={2.5} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </section>
+      )}
+
+      {(data?.baselines || []).length > 0 && (
+        <section className="card p-5">
+          <h2 className="text-sm font-semibold">Metric baselines</h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {data.baselines.map((x: any) => (
+              <div key={x.task_key + x.metric_key} className="rounded-xl bg-neutral-50 px-4 py-3 text-[13px]">
+                <span className="font-medium">{x.task_key} · {x.metric_key}</span>
+                <span className="text-neutral-500"> — median {x.centre}, MAD {x.variability_mad}, {x.valid_sessions} sessions ({x.confidence})</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {data?.forecast && Object.keys(data.forecast.models || {}).length > 0 && (
+        <section className="card p-5">
+          <h2 className="text-sm font-semibold">Core ML forecast <span className="font-normal text-neutral-400">(trained on your history)</span></h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {Object.entries(data.forecast.models).slice(0, 6).map(([k, m]: any) => (
+              <div key={k} className="rounded-xl bg-neutral-50 px-4 py-3 text-[13px]">
+                <span className="font-medium">{k}</span>
+                <span className="text-neutral-500"> — next ≈ {m.forecast} (range {m.band?.[0]}–{m.band?.[1]}), n={m.n}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-neutral-400">{data.forecast.note}</p>
+        </section>
+      )}
+
+      <Link href="/games" className="btn-primary">Practice to grow your baseline</Link>
+    </main>
+  );
+}
