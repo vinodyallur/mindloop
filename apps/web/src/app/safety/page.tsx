@@ -1,16 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getFlags, getReferrals, createReferral, transitionReferral, getModelCard } from "@/lib/api";
+import { getFlags, getReferrals, getOverdue, nudgeReferral, createReferral, transitionReferral, getModelCard } from "@/lib/api";
 
 // Q7 referral loop + Q8 decision-support boundaries + Q10 model card.
 const STATES = ["referred", "accepted", "booked", "attended", "outcome", "closed", "did_not_attend", "uncontactable", "escalated"];
+const CHANNELS = ["app", "sms", "whatsapp", "call", "kin", "visit"];
 
 export default function Safety() {
   const [flags, setFlags] = useState<any[]>([]);
   const [refs, setRefs] = useState<any[]>([]);
+  const [overdue, setOverdue] = useState<any[]>([]);
   const [reason, setReason] = useState("");
   const [card, setCard] = useState<any>(null);
-  const load = () => { getFlags().then((f) => f && setFlags(f)); getReferrals().then((r) => r && setRefs(r)); };
+  const load = () => { getFlags().then((f) => f && setFlags(f)); getReferrals().then((r) => r && setRefs(r)); getOverdue().then((o) => o && setOverdue(o)); };
   useEffect(() => { load(); getModelCard().then(setCard); }, []);
   return (
     <main className="mx-auto max-w-3xl space-y-5 px-5 py-8">
@@ -33,10 +35,17 @@ export default function Safety() {
           <div key={r.id} className="rounded-xl bg-neutral-50 p-3 text-[13px]">
             <p className="font-medium">{r.reason} · <span className="text-neutral-500">{r.state}</span> · owner {r.owner}</p>
             <div className="mt-1 flex flex-wrap gap-1">{STATES.filter((s) => s !== r.state).map((s) => <button key={s} onClick={async () => { await transitionReferral(r.id, s); load(); }} className="rounded-full bg-white px-2 py-0.5 text-[11px] text-neutral-500 ring-1 ring-neutral-200 hover:bg-neutral-100">{s}</button>)}</div>
+            <div className="mt-1 flex flex-wrap items-center gap-1"><span className="text-[11px] text-neutral-400">Nudge:</span>{CHANNELS.map((ch) => <button key={ch} onClick={async () => { await nudgeReferral(r.id, ch); load(); }} className="rounded-full bg-white px-2 py-0.5 text-[11px] text-neutral-500 ring-1 ring-neutral-200 hover:bg-neutral-100">{ch}</button>)}</div>
           </div>
         ))}
         {!refs.length && <p className="text-sm text-neutral-400">No referrals yet.</p>}
       </section>
+      {overdue.length > 0 && (
+        <section className="card p-5">
+          <h2 className="text-sm font-semibold">Overdue — needs attention first</h2>
+          {overdue.map((o: any) => <p key={o.id} className="mt-1 text-[13px] text-neutral-600">{o.needs_attention ? "🔴" : "🟡"} {o.reason} · {o.state} · {o.attempts} attempts · owner {o.owner}</p>)}
+        </section>
+      )}
       {card && (
         <section className="card p-5">
           <h2 className="text-sm font-semibold">Model card — {card.model}</h2>

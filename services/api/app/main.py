@@ -278,21 +278,78 @@ def outcome_history(instrument: str = "", db: DB = Depends(DBM.get_db)):
 @app.get("/api/v1/outcomes/30day", dependencies=[Depends(auth)])
 def outcomes_30day(db: DB = Depends(DBM.get_db)):
     """Q4 evaluation set: baseline vs latest per instrument + behavior maintenance."""
+    return _outcomes_window(db, days=30)
+
+@app.get("/api/v1/outcomes/windows", dependencies=[Depends(auth)])
+def outcomes_windows(db: DB = Depends(DBM.get_db)):
+    """Q4 longitudinal: 30/90/180-day windows + waitlist arm + dose-response + ITT export."""
     u = get_user(db)
+    wins = {f"{d}d": _outcomes_window(db, days=d) for d in (30, 90, 180)}
+    arm = (db.query(DBM.Consent).filter_by(user_id=u.id, data_category="study_arm").first())
+    arm_val = None
+    if arm:
+        import json
+        try: arm_val = json.loads(arm.consent_version or "{}").get("arm")
+        except Exception: arm_val = None
+    hist = db.query(DBM.Session).filter_by(user_id=u.id, validity_status="valid").count()
+    wins["_design"] = {
+        "arm": arm_val or "unassigned",
+        "assign": "POST /api/v1/study/assign {arm: intervention|waitlist} — waitlist gets generic program until day 30",
+        "dose_response": {"valid_sessions": hist, "band": "1-5 low · 6-15 medium · 16+ high"},
+        "itt": "GET /api/v1/study/export — includes dropouts (all consented users), missing-data flags, attrition",
+        "windows": "baseline, 30, 90, 180 days; SRBAI at 0/30/90; WHO-5 primary vs generic-app control",
+    }
+    return wins
+
+def _outcomes_window(db: DB, days: int):
+    from datetime import timedelta
+    u = get_user(db)
+    cutoff = DBM.now().replace(tzinfo=None) - timedelta(days=days)
     out = {}
     for inst in SURVEYS:
         rows = db.query(DBM.OutcomeSurvey).filter_by(user_id=u.id, instrument=inst).order_by(DBM.OutcomeSurvey.created_at).all()
-        if len(rows) >= 2:
-            first, last = rows[0].score, rows[-1].score
-            out[inst] = {"baseline": first, "latest": last, "delta": round(last - first, 2),
-                         "n": len(rows), "max": rows[0].max_score}
-    days = db.query(DBM.HabitDay).filter_by(user_id=u.id).order_by(DBM.HabitDay.day).all()
-    met = [d.day for d in days if d.target_met]
-    out["_behavior"] = {"active_days": len(days), "target_days_met": len(met),
-                        "maintenance_pct": round(100 * len(met) / max(len(days), 1), 1)}
+        base = [r for r in rows if (r.created_at or cutoff).replace(tzinfo=None) >= cutoff] or rows
+        if len(base) >= 2:
+            out[inst] = {"baseline": base[0].score, "latest": base[-1].score,
+                         "delta": round(base[-1].score - base[0].score, 2), "n": len(base), "max": base[0].max_score}
+        elif len(base) == 1:
+            out[inst] = {"baseline": base[0].score, "latest": base[0].score, "delta": 0.0, "n": 1, "max": base[0].max_score}
+    days_q = db.query(DBM.HabitDay).filter_by(user_id=u.id).order_by(DBM.HabitDay.day).all()
+    met = [d.day for d in days_q if d.target_met]
+    out["_behavior"] = {"active_days": len(days_q), "target_days_met": len(met),
+                        "maintenance_pct": round(100 * len(met) / max(len(days_q), 1), 1)}
     out["_thresholds"] = {"who5": ">=10/100 meaningful (rescaled)", "phq2/gad2": ">=3 suggests professional discussion",
                           "isi3": "track direction over 30 days", "srbai": "automaticity 0/30/90 days (Lally 2010)"}
     return out
+
+@app.post("/api/v1/study/assign", dependencies=[Depends(auth)])
+def study_assign(body: dict, db: DB = Depends(DBM.get_db)):
+    arm = body.get("arm", "intervention")
+    if arm not in ("intervention", "waitlist"): raise HTTPException(400, "arm must be intervention|waitlist")
+    u = get_user(db)
+    import json
+    c = db.query(DBM.Consent).filter_by(user_id=u.id, data_category="study_arm").first()
+    if not c:
+        c = DBM.Consent(user_id=u.id, data_category="study_arm", consent_version=json.dumps({"arm": arm})); db.add(c)
+    else:
+        c.consent_version = json.dumps({"arm": arm}); c.revoked_at = None
+    db.commit()
+    return {"arm": arm, "note": "Waitlist receives generic program until day 30, then full personalization."}
+
+@app.get("/api/v1/study/export", dependencies=[Depends(auth)])
+def study_export(db: DB = Depends(DBM.get_db)):
+    """Q4 ITT export: every consented user incl. dropouts, missing-data flags."""
+    import json
+    rows = []
+    for u in db.query(DBM.User).all():
+        cons = {c.data_category: c.revoked_at is None for c in db.query(DBM.Consent).filter_by(user_id=u.id)}
+        n_sess = db.query(DBM.Session).filter_by(user_id=u.id, validity_status="valid").count()
+        n_surv = db.query(DBM.OutcomeSurvey).filter_by(user_id=u.id).count()
+        rows.append({"user_id": u.id, "consents": cons, "valid_sessions": n_sess, "surveys": n_surv,
+                     "dropout": n_sess == 0 and n_surv == 0,
+                     "missing": [k for k, v in {"sessions": n_sess == 0, "surveys": n_surv == 0}.items() if v]})
+    return {"n": len(rows), "rows": rows,
+            "method": "intention-to-treat: all consented users included; dropouts flagged, not dropped"}
 
 # ================= Q7/Q8: safety loop + referral tracking =================
 @app.post("/api/v1/checkin", dependencies=[Depends(auth)])
@@ -343,6 +400,50 @@ def list_referrals(db: DB = Depends(DBM.get_db)):
     return [{"id": r.id, "reason": r.reason, "state": r.state, "owner": r.owner,
              "history": json.loads(r.history_json or "[]")}
             for r in db.query(DBM.Referral).filter_by(user_id=u.id).order_by(DBM.Referral.created_at.desc())]
+
+@app.get("/api/v1/referrals/{rid}/fhir", dependencies=[Depends(auth)])
+def referral_fhir(rid: str, db: DB = Depends(DBM.get_db)):
+    """Q7: HL7 FHIR R4 ServiceRequest export — status flows back to the referrer's system."""
+    import json
+    r = db.get(DBM.Referral, rid)
+    if not r: raise HTTPException(404, "referral not found")
+    fhir_status = {"referred": "draft", "accepted": "active", "booked": "active", "attended": "completed",
+                   "outcome": "completed", "closed": "revoked", "not_booked": "revoked",
+                   "did_not_attend": "revoked", "uncontactable": "on-hold", "declined": "revoked",
+                   "rejected": "revoked", "escalated": "active", "lost_to_followup": "revoked"}.get(r.state, "unknown")
+    return {"resourceType": "ServiceRequest", "id": r.id,
+            "status": fhir_status, "intent": "order", "priority": "routine",
+            "code": {"text": r.reason}, "requester": {"display": r.owner},
+            "note": [{"text": h.get("note", "") or h.get("state", "")} for h in json.loads(r.history_json or "[]")]}
+
+@app.post("/api/v1/referrals/{rid}/nudge", dependencies=[Depends(auth)])
+def referral_nudge(rid: str, body: dict, db: DB = Depends(DBM.get_db)):
+    """Q7 contact protocol: log each outreach attempt (day 0-1 app, day 1-3 call, day 3-7 kin/GP)."""
+    import json
+    r = db.get(DBM.Referral, rid)
+    if not r: raise HTTPException(404, "referral not found")
+    channel = body.get("channel", "app")
+    if channel not in ("app", "sms", "whatsapp", "call", "kin", "visit"): raise HTTPException(400, "unknown channel")
+    hist = json.loads(r.history_json or "[]")
+    hist.append({"state": r.state, "note": f"nudge:{channel} {body.get('note', '')}", "at": str(DBM.now())})
+    r.history_json = DBM.dumps(hist)
+    db.add(DBM.Audit(user_id=r.user_id, event_type="referral_nudge", metadata_json=DBM.dumps({"id": rid, "channel": channel})))
+    db.commit()
+    return {"id": rid, "channel": channel, "attempts": sum(1 for h in hist if str(h.get("note", "")).startswith("nudge:"))}
+
+@app.get("/api/v1/referrals/overdue", dependencies=[Depends(auth)])
+def referrals_overdue(db: DB = Depends(DBM.get_db)):
+    """Q7 governance: referrals stalled without closure, sorted by risk."""
+    import json
+    u = get_user(db)
+    out = []
+    for r in db.query(DBM.Referral).filter_by(user_id=u.id):
+        if r.state in ("closed", "outcome", "attended"): continue
+        hist = json.loads(r.history_json or "[]")
+        nudges = sum(1 for h in hist if str(h.get("note", "")).startswith("nudge:"))
+        out.append({"id": r.id, "reason": r.reason, "state": r.state, "owner": r.owner,
+                    "attempts": nudges, "needs_attention": nudges >= 3})
+    return sorted(out, key=lambda x: (not x["needs_attention"], x["state"]))
 
 @app.get("/api/v1/model-card", dependencies=[Depends(auth)])
 def model_card():

@@ -72,3 +72,13 @@ def test_phq2_flag_and_referral_loop():
     for s in ["accepted", "booked", "attended", "outcome", "closed"]:
         assert c.post(f"/api/v1/referrals/{rid}/transition", json={"state": s}, headers=H).json()["state"] == s
     assert c.post("/api/v1/checkin", json={"mood": 1, "focus": 1, "note": "I feel like hurt myself"}, headers=H).json()["flag"]["tier"] == "crisis"
+
+def test_windows_study_fhir_nudge():
+    assert c.post("/api/v1/study/assign", json={"arm": "waitlist"}, headers=H).json()["arm"] == "waitlist"
+    w = c.get("/api/v1/outcomes/windows", headers=H).json()
+    assert "30d" in w and "180d" in w and w["_design"]["arm"] == "waitlist"
+    assert c.get("/api/v1/study/export", headers=H).json()["n"] >= 1
+    rid = c.post("/api/v1/referrals", json={"reason": "fhir check"}, headers=H).json()["id"]
+    assert c.get(f"/api/v1/referrals/{rid}/fhir", headers=H).json()["resourceType"] == "ServiceRequest"
+    assert c.post(f"/api/v1/referrals/{rid}/nudge", json={"channel": "sms"}, headers=H).json()["attempts"] == 1
+    assert any(o["id"] == rid for o in c.get("/api/v1/referrals/overdue", headers=H).json())

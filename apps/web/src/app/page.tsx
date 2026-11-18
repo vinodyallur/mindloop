@@ -1,20 +1,23 @@
+"use client";
 import Link from "next/link";
 import { GAMES } from "@/lib/games";
+import { useLang } from "@/lib/i18n";
 
 export default function Home() {
+  const { t } = useLang();
   return (
     <main className="mx-auto max-w-5xl space-y-14 px-5 py-10">
       <section className="pt-8 text-center">
-        <p className="inline-block rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-xs font-medium text-neutral-500">Attention &amp; wellbeing — not a diagnosis</p>
+        <p className="inline-block rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-xs font-medium text-neutral-500">{t("notDiagnosis")}</p>
         <h1 className="mx-auto mt-5 max-w-2xl text-4xl font-semibold leading-[1.08] tracking-tight sm:text-6xl">
-          Know your focus, from your own data.
+          {t("hero")}
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-neutral-500">
-          Short tasks build a personal baseline. MindLoop compares you only with your usual pattern — alongside sleep and activity context.
+          {t("heroSub")}
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/baseline" className="btn-primary">See your baseline</Link>
-          <Link href="/games" className="btn-ghost">Browse {GAMES.length} tasks</Link>
+          <Link href="/baseline" className="btn-primary">{t("seeBaseline")}</Link>
+          <Link href="/games" className="btn-ghost">{t("browseTasks")} · {GAMES.length}</Link>
         </div>
       </section>
 
@@ -23,9 +26,9 @@ export default function Home() {
           ["1 · Do", "A 2–4 minute task. Trial-level timing is recorded."],
           ["2 · Baseline", "Median of your valid sessions becomes your index."],
           ["3 · Notice", "Repeated drift from your band surfaces gently."],
-        ].map(([t, d]) => (
-          <div key={t} className="card p-5">
-            <p className="text-sm font-semibold">{t}</p>
+        ].map(([title, d]) => (
+          <div key={title} className="card p-5">
+            <p className="text-sm font-semibold">{title}</p>
             <p className="mt-1 text-[13px] leading-relaxed text-neutral-500">{d}</p>
           </div>
         ))}

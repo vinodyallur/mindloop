@@ -1,61 +1,69 @@
+"use client";
 import Link from "next/link";
 import "./globals.css";
+import { LangProvider, useLang, LANGS, LANG_LABEL, type Lang } from "@/lib/i18n";
 
-const nav = [
-  { href: "/", label: "Home" },
-  { href: "/baseline", label: "Baseline" },
-  { href: "/games", label: "Train" },
-  { href: "/outcomes", label: "Outcomes" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/report", label: "Report" },
-  { href: "/safety", label: "Care" },
-  { href: "/settings", label: "Settings" },
-];
-
-export const metadata = {
-  title: "MindLoop — Attention & Wellbeing",
-  description: "Track attention-task performance vs your personal baseline. Not a diagnostic device.",
-};
+function Shell({ children }: { children: React.ReactNode }) {
+  const { lang, setLang, t } = useLang();
+  const nav = [
+    { href: "/", label: t("home") },
+    { href: "/baseline", label: t("baseline") },
+    { href: "/games", label: t("train") },
+    { href: "/outcomes", label: t("outcomes") },
+    { href: "/dashboard", label: t("dashboard") },
+    { href: "/report", label: t("report") },
+    { href: "/safety", label: t("care") },
+    { href: "/settings", label: t("settings") },
+  ];
+  return (
+    <body className="min-h-screen antialiased">
+      <header className="sticky top-0 z-40 border-b border-neutral-200/70 bg-[#fafafa]/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-5 py-3">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white">M</span>
+            <span className="text-[17px] font-semibold tracking-tight">MindLoop</span>
+          </Link>
+          <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Primary">
+            {nav.map((n) => (
+              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-neutral-500 transition hover:bg-neutral-200/60 hover:text-neutral-900">
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label="Language" className="rounded-full border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600 outline-none">
+            {LANGS.map((l) => <option key={l} value={l}>{LANG_LABEL[l]}</option>)}
+          </select>
+        </div>
+      </header>
+      <div className="pb-24">{children}</div>
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200/70 bg-white/90 backdrop-blur-md sm:hidden" aria-label="Mobile">
+        <div className="grid grid-cols-5 px-2 py-2">
+          {[
+            { href: "/", label: t("home") },
+            { href: "/baseline", label: t("baseline") },
+            { href: "/games", label: t("train") },
+            { href: "/dashboard", label: t("stats") },
+            { href: "/settings", label: t("settings") },
+          ].map((n) => (
+            <Link key={n.href} href={n.href} className="rounded-xl py-2 text-center text-[11px] font-medium text-neutral-500 active:bg-neutral-100">
+              {n.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
+      <footer className="border-t border-neutral-200/70 py-6 text-center text-xs text-neutral-400">
+        MindLoop · {t("notDiagnosis")}
+      </footer>
+    </body>
+  );
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">
-        <header className="sticky top-0 z-40 border-b border-neutral-200/70 bg-[#fafafa]/85 backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white">M</span>
-              <span className="text-[17px] font-semibold tracking-tight">MindLoop</span>
-            </Link>
-            <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Primary">
-              {nav.map((n) => (
-                <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13.5px] font-medium text-neutral-500 transition hover:bg-neutral-200/60 hover:text-neutral-900">
-                  {n.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </header>
-        <div className="pb-24">{children}</div>
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200/70 bg-white/90 backdrop-blur-md sm:hidden">
-          <div className="grid grid-cols-5 px-2 py-2">
-            {[
-              { href: "/", label: "Home" },
-              { href: "/baseline", label: "Baseline" },
-              { href: "/games", label: "Train" },
-              { href: "/dashboard", label: "Stats" },
-              { href: "/settings", label: "Settings" },
-            ].map((n) => (
-              <Link key={n.href} href={n.href} className="rounded-xl py-2 text-center text-[11px] font-medium text-neutral-500 active:bg-neutral-100">
-                {n.label}
-              </Link>
-            ))}
-          </div>
-        </nav>
-        <footer className="border-t border-neutral-200/70 py-6 text-center text-xs text-neutral-400">
-          MindLoop · descriptive self-tracking only · not a diagnostic device
-        </footer>
-      </body>
+      <LangProvider>
+        <Shell>{children}</Shell>
+      </LangProvider>
     </html>
   );
 }

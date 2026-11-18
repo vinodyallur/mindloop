@@ -39,6 +39,13 @@ export const createReferral = (reason: string) =>
 export const transitionReferral = (id: string, state: string, note = "") =>
   req(`/api/v1/referrals/${id}/transition`, { method: "POST", body: JSON.stringify({ state, note }) });
 export const getReferrals = () => req("/api/v1/referrals");
+export const getOverdue = () => req("/api/v1/referrals/overdue");
+export const nudgeReferral = (id: string, channel: string) =>
+  req(`/api/v1/referrals/${id}/nudge`, { method: "POST", body: JSON.stringify({ channel }) });
+export const getReferralFhir = (id: string) => req(`/api/v1/referrals/${id}/fhir`);
+export const getWindows = () => req("/api/v1/outcomes/windows");
+export const assignArm = (arm: string) =>
+  req("/api/v1/study/assign", { method: "POST", body: JSON.stringify({ arm }) });
 export const getModelCard = () => req("/api/v1/model-card");
 export const setConsent = (data_category: string, granted: boolean) =>
   req("/api/v1/consents", { method: "POST", body: JSON.stringify({ data_category, granted }) });
