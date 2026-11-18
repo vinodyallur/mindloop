@@ -50,3 +50,33 @@ class CheckinIn(BaseModel):
     mood: int  # 1-5 self-report
     focus: int  # 1-5 self-report
     note: str = ""
+
+# ---- Q1/Q4 validated instruments ----
+SURVEYS = {
+    "who5": {"n": 5, "max": 25, "scale": [0, 1, 2, 3, 4, 5],
+             "q": ["cheerful", "calm", "active", "rested", "interested"]},
+    "pss4": {"n": 4, "max": 16, "scale": [0, 1, 2, 3, 4],
+             "q": ["control", "confidence", "things-going-well", "overwhelm"]},
+    "isi3": {"n": 3, "max": 12, "scale": [0, 1, 2, 3, 4],
+             "q": ["falling-asleep", "staying-asleep", "satisfaction"]},
+    "phq2": {"n": 2, "max": 6, "scale": [0, 1, 2, 3],
+             "q": ["low-interest", "low-mood"]},
+    "gad2": {"n": 2, "max": 6, "scale": [0, 1, 2, 3],
+             "q": ["nervous", "uncontrollable-worry"]},
+    "srbai": {"n": 4, "max": 28, "scale": [1, 2, 3, 4, 5, 6, 7],
+              "q": ["automatic", "without-thinking", "routine", "typical"]},
+}
+
+class SurveyIn(BaseModel):
+    instrument: str
+    answers: List[int]
+
+class ReferralIn(BaseModel):
+    reason: str
+    owner: str = "care-team"
+
+class ReferralUpdate(BaseModel):
+    state: str
+    note: str = ""
+
+CRISIS_WORDS = ["suicide", "kill myself", "end my life", "self-harm", "self harm", "hurt myself"]

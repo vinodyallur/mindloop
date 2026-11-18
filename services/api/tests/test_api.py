@@ -58,3 +58,17 @@ def test_steadiness_scoring():
     assert A.metric_index("median_rt_ms", 400, 400, 10) == 50.0
     assert A.metric_index("median_rt_ms", 500, 400, 10) < 50.0
     assert A.metric_index("accuracy", 0.9, 0.8, 0.05) > 50.0
+
+def test_outcome_survey_and_30day():
+    assert c.post("/api/v1/outcomes/submit", json={"instrument": "who5", "answers": [3,3,3,3,3]}, headers=H).json()["score"] == 15
+    assert c.post("/api/v1/outcomes/submit", json={"instrument": "who5", "answers": [4,4,4,4,4]}, headers=H).json()["score"] == 20
+    d = c.get("/api/v1/outcomes/30day", headers=H).json()
+    assert d["who5"]["delta"] == 5 and "_behavior" in d
+
+def test_phq2_flag_and_referral_loop():
+    r = c.post("/api/v1/outcomes/submit", json={"instrument": "phq2", "answers": [2,2]}, headers=H).json()
+    assert r["flag"] and r["flag"]["tier"] == "clinical_review"
+    rid = c.post("/api/v1/referrals", json={"reason": "low mood review"}, headers=H).json()["id"]
+    for s in ["accepted", "booked", "attended", "outcome", "closed"]:
+        assert c.post(f"/api/v1/referrals/{rid}/transition", json={"state": s}, headers=H).json()["state"] == s
+    assert c.post("/api/v1/checkin", json={"mood": 1, "focus": 1, "note": "I feel like hurt myself"}, headers=H).json()["flag"]["tier"] == "crisis"

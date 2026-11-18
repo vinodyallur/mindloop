@@ -115,6 +115,48 @@ class Audit(Base):
     created_at = Column(DateTime, default=now)
     metadata_json = Column(Text, default="{}")
 
+# ---- Q1/Q4 validated outcome instruments (self-report, non-diagnostic) ----
+class OutcomeSurvey(Base):
+    __tablename__ = "outcome_surveys"
+    id = Column(String, primary_key=True, default=uid)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    instrument = Column(String, index=True)  # who5 | pss4 | isi3 | phq2 | gad2 | srbai
+    score = Column(Float)
+    max_score = Column(Float)
+    answers_json = Column(Text, default="{}")
+    created_at = Column(DateTime, default=now, index=True)
+
+class HabitDay(Base):
+    __tablename__ = "habit_days"
+    id = Column(String, primary_key=True, default=uid)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    day = Column(String, index=True)  # YYYY-MM-DD
+    target_met = Column(Integer, default=0)  # >=1 valid session or program completion
+    sessions = Column(Integer, default=0)
+
+# ---- Q7/Q8 safety loop: red-flag escalation + referral tracking ----
+class Flag(Base):
+    __tablename__ = "safety_flags"
+    id = Column(String, primary_key=True, default=uid)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    tier = Column(String)  # self_harm | crisis | clinical_review
+    source = Column(String)  # checkin_note | survey | manual
+    detail = Column(Text, default="")
+    status = Column(String, default="open")  # open | reviewed | closed
+    created_at = Column(DateTime, default=now)
+    reviewed_at = Column(DateTime, nullable=True)
+
+class Referral(Base):
+    __tablename__ = "referrals"
+    id = Column(String, primary_key=True, default=uid)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    reason = Column(String)
+    state = Column(String, default="referred")  # referred|accepted|booked|attended|outcome|closed + exceptions
+    owner = Column(String, default="care-team")
+    due_at = Column(DateTime, nullable=True)
+    history_json = Column(Text, default="[]")
+    created_at = Column(DateTime, default=now)
+
 def init_db(): Base.metadata.create_all(bind=engine)
 def get_db():
     db = SessionLocal()

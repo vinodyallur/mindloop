@@ -226,7 +226,137 @@ def program_today(): return {"activities": ACTIVITIES, "note": "Bounded practice
 def completion(body: CompletionIn, db: DB = Depends(DBM.get_db)):
     u = get_user(db)
     db.add(DBM.Completion(user_id=u.id, activity_key=body.activity_key, result_json=DBM.dumps(body.result)))
+    _touch_habit_day(db, u.id)
     db.commit(); return {"recorded": body.activity_key}
+
+def _touch_habit_day(db: DB, user_id: str):
+    from datetime import timezone
+    day = datetime.now(timezone.utc).date().isoformat()
+    h = db.query(DBM.HabitDay).filter_by(user_id=user_id, day=day).first()
+    if not h:
+        h = DBM.HabitDay(user_id=user_id, day=day); db.add(h)
+    h.target_met = 1; h.sessions = (h.sessions or 0) + 1
+
+# ================= Q1/Q4: validated outcome instruments =================
+@app.get("/api/v1/outcomes/instruments", dependencies=[Depends(auth)])
+def instruments():
+    return {k: {"questions": v["q"], "scale": v["scale"], "max": v["max"]} for k, v in SURVEYS.items()}
+
+@app.post("/api/v1/outcomes/submit", dependencies=[Depends(auth)])
+def submit_survey(body: SurveyIn, db: DB = Depends(DBM.get_db)):
+    spec = SURVEYS.get(body.instrument)
+    if not spec or len(body.answers) != spec["n"] or any(a not in spec["scale"] for a in body.answers):
+        raise HTTPException(400, "invalid instrument or answers")
+    u = get_user(db)
+    score = float(sum(body.answers))
+    db.add(DBM.OutcomeSurvey(user_id=u.id, instrument=body.instrument, score=score,
+                             max_score=float(spec["max"]), answers_json=DBM.dumps(body.answers)))
+    db.add(DBM.Audit(user_id=u.id, event_type=f"outcome_{body.instrument}",
+                     metadata_json=DBM.dumps({"score": score})))
+    flag = None
+    if body.instrument in ("phq2", "gad2") and score >= 3:
+        flag = _open_flag(db, u.id, "clinical_review", body.instrument,
+                          f"{body.instrument.upper()}={score}/{spec['max']}: suggest discussing with a qualified professional.")
+    db.commit()
+    return {"instrument": body.instrument, "score": score, "max": spec["max"],
+            "flag": flag, "note": "Self-report context only, not a diagnosis."}
+
+def _open_flag(db: DB, user_id: str, tier: str, source: str, detail: str):
+    f = DBM.Flag(user_id=user_id, tier=tier, source=source, detail=detail)
+    db.add(f); db.flush()
+    return {"id": f.id, "tier": tier, "detail": detail,
+            "message": "Thank you for sharing. Consider speaking with a qualified professional or local helpline. MindLoop does not diagnose."}
+
+@app.get("/api/v1/outcomes/history", dependencies=[Depends(auth)])
+def outcome_history(instrument: str = "", db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    q = db.query(DBM.OutcomeSurvey).filter_by(user_id=u.id)
+    if instrument: q = q.filter_by(instrument=instrument)
+    return [{"instrument": s.instrument, "score": s.score, "max": s.max_score, "at": str(s.created_at)}
+            for s in q.order_by(DBM.OutcomeSurvey.created_at).limit(200)]
+
+@app.get("/api/v1/outcomes/30day", dependencies=[Depends(auth)])
+def outcomes_30day(db: DB = Depends(DBM.get_db)):
+    """Q4 evaluation set: baseline vs latest per instrument + behavior maintenance."""
+    u = get_user(db)
+    out = {}
+    for inst in SURVEYS:
+        rows = db.query(DBM.OutcomeSurvey).filter_by(user_id=u.id, instrument=inst).order_by(DBM.OutcomeSurvey.created_at).all()
+        if len(rows) >= 2:
+            first, last = rows[0].score, rows[-1].score
+            out[inst] = {"baseline": first, "latest": last, "delta": round(last - first, 2),
+                         "n": len(rows), "max": rows[0].max_score}
+    days = db.query(DBM.HabitDay).filter_by(user_id=u.id).order_by(DBM.HabitDay.day).all()
+    met = [d.day for d in days if d.target_met]
+    out["_behavior"] = {"active_days": len(days), "target_days_met": len(met),
+                        "maintenance_pct": round(100 * len(met) / max(len(days), 1), 1)}
+    out["_thresholds"] = {"who5": ">=10/100 meaningful (rescaled)", "phq2/gad2": ">=3 suggests professional discussion",
+                          "isi3": "track direction over 30 days", "srbai": "automaticity 0/30/90 days (Lally 2010)"}
+    return out
+
+# ================= Q7/Q8: safety loop + referral tracking =================
+@app.post("/api/v1/checkin", dependencies=[Depends(auth)])
+def checkin(body: CheckinIn, db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    db.add(DBM.Completion(user_id=u.id, activity_key="checkin",
+                          result_json=DBM.dumps({"mood": body.mood, "focus": body.focus, "note": body.note[:500]})))
+    _touch_habit_day(db, u.id)
+    flag = None
+    if any(w in body.note.lower() for w in CRISIS_WORDS):
+        flag = _open_flag(db, u.id, "crisis", "checkin_note",
+                          "User note matched crisis keywords. Same-day human review required; show local helplines.")
+    db.commit()
+    return {"recorded": True, "flag": flag}
+
+@app.get("/api/v1/safety/flags", dependencies=[Depends(auth)])
+def safety_flags(db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    return [{"id": f.id, "tier": f.tier, "source": f.source, "detail": f.detail,
+             "status": f.status, "at": str(f.created_at)}
+            for f in db.query(DBM.Flag).filter_by(user_id=u.id).order_by(DBM.Flag.created_at.desc()).limit(20)]
+
+@app.post("/api/v1/referrals", dependencies=[Depends(auth)])
+def create_referral(body: ReferralIn, db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    r = DBM.Referral(user_id=u.id, reason=body.reason, owner=body.owner,
+                     history_json=DBM.dumps([{"state": "referred", "at": str(DBM.now())}]))
+    db.add(r); db.commit(); db.refresh(r)
+    return {"id": r.id, "state": r.state}
+
+@app.post("/api/v1/referrals/{rid}/transition", dependencies=[Depends(auth)])
+def transition_referral(rid: str, body: ReferralUpdate, db: DB = Depends(DBM.get_db)):
+    allowed = {"referred", "accepted", "booked", "attended", "outcome", "closed",
+               "not_booked", "did_not_attend", "uncontactable", "declined", "rejected", "escalated", "lost_to_followup"}
+    if body.state not in allowed: raise HTTPException(400, "unknown state")
+    r = db.get(DBM.Referral, rid)
+    if not r: raise HTTPException(404, "referral not found")
+    import json
+    hist = json.loads(r.history_json or "[]"); hist.append({"state": body.state, "note": body.note, "at": str(DBM.now())})
+    r.state, r.history_json = body.state, DBM.dumps(hist)
+    db.commit()
+    return {"id": r.id, "state": r.state}
+
+@app.get("/api/v1/referrals", dependencies=[Depends(auth)])
+def list_referrals(db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    import json
+    return [{"id": r.id, "reason": r.reason, "state": r.state, "owner": r.owner,
+             "history": json.loads(r.history_json or "[]")}
+            for r in db.query(DBM.Referral).filter_by(user_id=u.id).order_by(DBM.Referral.created_at.desc())]
+
+@app.get("/api/v1/model-card", dependencies=[Depends(auth)])
+def model_card():
+    """Q10 system transparency."""
+    return {
+        "model": "MindLoop core ML forecaster v1 (EWMA + median/MAD band)",
+        "intended_use": "Describe the user's own metric trajectory. Not a diagnosis, not treatment advice.",
+        "inputs": "User's own valid session metrics only. No population norms, no third-party data.",
+        "limits": ["Needs >=3 sessions for a band; forecasts widen with sparse data.",
+                   "Near-transfer only (Melby-Lervag 2016; Sala & Gobet 2017).",
+                   "Not validated for minors, clinical groups, or other cultures (see Q9)."],
+        "versions": "Retrained incrementally on each valid session; version logged per forecast in audit trail.",
+        "challenge": "Users can delete data (DELETE /api/v1/me) and re-baseline; clinicians can override any flag.",
+    }
 
 @app.get("/api/v1/dashboard/summary", dependencies=[Depends(auth)])
 def dashboard(db: DB = Depends(DBM.get_db)):

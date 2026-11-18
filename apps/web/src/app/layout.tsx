@@ -5,8 +5,10 @@ const nav = [
   { href: "/", label: "Home" },
   { href: "/baseline", label: "Baseline" },
   { href: "/games", label: "Train" },
+  { href: "/outcomes", label: "Outcomes" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/report", label: "Report" },
+  { href: "/safety", label: "Care" },
   { href: "/settings", label: "Settings" },
 ];
 
@@ -25,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white">M</span>
               <span className="text-[17px] font-semibold tracking-tight">MindLoop</span>
             </Link>
-            <nav className="flex items-center gap-1 overflow-x-auto">
+            <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Primary">
               {nav.map((n) => (
                 <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13.5px] font-medium text-neutral-500 transition hover:bg-neutral-200/60 hover:text-neutral-900">
                   {n.label}

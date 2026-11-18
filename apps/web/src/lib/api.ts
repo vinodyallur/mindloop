@@ -26,6 +26,20 @@ export async function submitSession(taskKey: string, trials: Trial[]) {
 
 export const getDashboard = () => req("/api/v1/dashboard/summary");
 export const getReport = () => req("/api/v1/reports/latest");
+export const getInstruments = () => req("/api/v1/outcomes/instruments");
+export const submitSurvey = (instrument: string, answers: number[]) =>
+  req("/api/v1/outcomes/submit", { method: "POST", body: JSON.stringify({ instrument, answers }) });
+export const getOutcomeHistory = (instrument = "") => req(`/api/v1/outcomes/history?instrument=${instrument}`);
+export const get30Day = () => req("/api/v1/outcomes/30day");
+export const postCheckin = (mood: number, focus: number, note: string) =>
+  req("/api/v1/checkin", { method: "POST", body: JSON.stringify({ mood, focus, note }) });
+export const getFlags = () => req("/api/v1/safety/flags");
+export const createReferral = (reason: string) =>
+  req("/api/v1/referrals", { method: "POST", body: JSON.stringify({ reason }) });
+export const transitionReferral = (id: string, state: string, note = "") =>
+  req(`/api/v1/referrals/${id}/transition`, { method: "POST", body: JSON.stringify({ state, note }) });
+export const getReferrals = () => req("/api/v1/referrals");
+export const getModelCard = () => req("/api/v1/model-card");
 export const setConsent = (data_category: string, granted: boolean) =>
   req("/api/v1/consents", { method: "POST", body: JSON.stringify({ data_category, granted }) });
 export const completeActivity = (activity_key: string) =>
