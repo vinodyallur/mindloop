@@ -356,7 +356,7 @@ def study_export(db: DB = Depends(DBM.get_db)):
 def checkin(body: CheckinIn, db: DB = Depends(DBM.get_db)):
     u = get_user(db)
     db.add(DBM.Completion(user_id=u.id, activity_key="checkin",
-                          result_json=DBM.dumps({"mood": body.mood, "focus": body.focus, "note": body.note[:500]})))
+                          result_json=DBM.dumps(body.model_dump())))
     _touch_habit_day(db, u.id)
     flag = None
     if any(w in body.note.lower() for w in CRISIS_WORDS):
@@ -364,6 +364,29 @@ def checkin(body: CheckinIn, db: DB = Depends(DBM.get_db)):
                           "User note matched crisis keywords. Same-day human review required; show local helplines.")
     db.commit()
     return {"recorded": True, "flag": flag}
+
+@app.get("/api/v1/behavior/summary", dependencies=[Depends(auth)])
+def behavior_summary(db: DB = Depends(DBM.get_db)):
+    """Q1 behavioral indicators: 7-day means from check-ins + device steps/sleep."""
+    import json
+    u = get_user(db)
+    rows = [json.loads(c.result_json or "{}") for c in
+            db.query(DBM.Completion).filter_by(user_id=u.id, activity_key="checkin")
+            .order_by(DBM.Completion.completed_at.desc()).limit(14)]
+    def mean(k):
+        vs = [r[k] for r in rows if isinstance(r.get(k), (int, float))]
+        return round(sum(vs) / len(vs), 1) if vs else None
+    steps = [w.value_numeric for w in db.query(DBM.Wearable).filter_by(user_id=u.id, data_type="steps")
+             .order_by(DBM.Wearable.start_at.desc()).limit(7)]
+    sleep = [w.value_numeric for w in db.query(DBM.Wearable).filter_by(user_id=u.id, data_type="sleep")
+             .order_by(DBM.Wearable.start_at.desc()).limit(7)]
+    return {"n_checkins": len(rows),
+            "fruit_veg_servings": mean("fruit_veg"), "sugary_drinks": mean("sugary_drinks"),
+            "alcohol_days_pw": mean("alcohol_days"), "active_minutes": mean("active_minutes"),
+            "sleep_hours_self": mean("sleep_hours"), "meds_adherence_pct":
+                round(100 * sum(1 for r in rows if r.get("meds_taken")) / max(sum(1 for r in rows if "meds_taken" in r), 1), 1) or None,
+            "steps_7d": [round(v, 0) for v in steps], "sleep_min_7d": [round(v, 0) for v in sleep],
+            "benchmarks": {"mvpa_min_pw": 150, "steps_uplift": "+1000/day meaningful (Q4)"}}
 
 @app.get("/api/v1/safety/flags", dependencies=[Depends(auth)])
 def safety_flags(db: DB = Depends(DBM.get_db)):

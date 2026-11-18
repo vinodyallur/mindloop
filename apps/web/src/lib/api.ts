@@ -31,8 +31,9 @@ export const submitSurvey = (instrument: string, answers: number[]) =>
   req("/api/v1/outcomes/submit", { method: "POST", body: JSON.stringify({ instrument, answers }) });
 export const getOutcomeHistory = (instrument = "") => req(`/api/v1/outcomes/history?instrument=${instrument}`);
 export const get30Day = () => req("/api/v1/outcomes/30day");
-export const postCheckin = (mood: number, focus: number, note: string) =>
-  req("/api/v1/checkin", { method: "POST", body: JSON.stringify({ mood, focus, note }) });
+export const postCheckin = (mood: number, focus: number, note: string, extra: Record<string, any> = {}) =>
+  req("/api/v1/checkin", { method: "POST", body: JSON.stringify({ mood, focus, note, ...extra }) });
+export const getBehavior = () => req("/api/v1/behavior/summary");
 export const getFlags = () => req("/api/v1/safety/flags");
 export const createReferral = (reason: string) =>
   req("/api/v1/referrals", { method: "POST", body: JSON.stringify({ reason }) });

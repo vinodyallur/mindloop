@@ -13,6 +13,9 @@ function Shell({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: t("dashboard") },
     { href: "/report", label: t("report") },
     { href: "/safety", label: t("care") },
+    { href: "/clinician", label: "Review" },
+    { href: "/pilot", label: "Pilot" },
+    { href: "/evidence", label: "Evidence" },
     { href: "/settings", label: t("settings") },
   ];
   return (

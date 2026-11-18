@@ -50,6 +50,14 @@ class CheckinIn(BaseModel):
     mood: int  # 1-5 self-report
     focus: int  # 1-5 self-report
     note: str = ""
+    # Q1 behavioral add-ons (optional, self-report)
+    fruit_veg: Optional[int] = None  # servings today
+    sugary_drinks: Optional[int] = None
+    tobacco: Optional[str] = None  # never|former|daily|quit_attempt
+    alcohol_days: Optional[int] = None  # drinking days past week
+    active_minutes: Optional[int] = None  # moderate-to-vigorous minutes today
+    sleep_hours: Optional[float] = None
+    meds_taken: Optional[bool] = None  # self-management adherence
 
 # ---- Q1/Q4 validated instruments ----
 SURVEYS = {
