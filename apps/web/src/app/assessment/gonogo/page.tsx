@@ -41,13 +41,13 @@ export default function GoNoGo() {
   }, [respond]);
 
   if (phase === "intro") return (
-    <main className="mx-auto max-w-lg p-6 space-y-4">
+    <main className="mx-auto w-full max-w-[1400px] p-6 space-y-4">
       <h1 className="text-3xl font-bold">Go / No-Go</h1>
       <p>Press <b>Space / TAP</b> for <b className="text-green-500">GO</b>, withhold for <b className="text-red-500">STOP</b>. Practice task — not a diagnosis.</p>
       <button className="rounded-xl bg-blue-600 px-8 py-3 font-bold text-white" onClick={() => { trials.current = []; setPhase("run"); setTimeout(next, 400); }}>Start</button>
     </main>);
   if (phase === "done") return (
-    <main className="mx-auto max-w-lg p-6 space-y-4">
+    <main className="mx-auto w-full max-w-[1400px] p-6 space-y-4">
       <h1 className="text-3xl font-bold">Results</h1>
       {saved ? <pre className="overflow-auto rounded-xl bg-gray-900 p-4 text-sm text-green-300">{JSON.stringify(saved.metrics, null, 2)}</pre>
         : <p className="text-amber-500">Backend offline — start the API to save &amp; score this session.</p>}

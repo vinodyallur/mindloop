@@ -16,23 +16,23 @@ export default function Pilot() {
   const [arm, setArm] = useState("");
   useEffect(() => { getWindows().then(setWins); }, []);
   return (
-    <main className="mx-auto max-w-3xl space-y-5 px-5 py-8">
+    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-5 py-8">
       <header>
-        <p className="text-xs font-medium uppercase tracking-widest text-neutral-400">Q9 — local validation</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Q9 — local validation</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Pilot plan</h1>
-        <p className="mt-1 text-sm text-neutral-500">Approval elsewhere does not transfer. Current arm: <b>{wins?._design?.arm ?? "…"}</b></p>
+        <p className="mt-1 text-sm text-[#5c564a]">Approval elsewhere does not transfer. Current arm: <b>{wins?._design?.arm ?? "…"}</b></p>
       </header>
       <div className="flex gap-2">
         {(["intervention", "waitlist"] as const).map((a) => (
-          <button key={a} onClick={async () => { await assignArm(a); setArm(a); setWins(await getWindows()); }} className={`rounded-full px-4 py-1.5 text-sm ${((arm || wins?._design?.arm) === a) ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600"}`}>{a}</button>
+          <button key={a} onClick={async () => { await assignArm(a); setArm(a); setWins(await getWindows()); }} className={`rounded-full px-4 py-1.5 text-sm ${((arm || wins?._design?.arm) === a) ? "bg-[#b3541e] text-white" : "bg-[#f1ecdd] text-[#5c564a]"}`}>{a}</button>
         ))}
       </div>
       {STAGES.map(([t, d], i) => (
-        <section key={t} className="card p-5"><h2 className="text-sm font-semibold">Stage {i + 1}: {t}</h2><p className="mt-1 text-[13px] text-neutral-500">{d}</p></section>
+        <section key={t} className="card p-5"><h2 className="text-sm font-semibold">Stage {i + 1}: {t}</h2><p className="mt-1 text-[13px] text-[#5c564a]">{d}</p></section>
       ))}
       <section className="card p-5"><h2 className="text-sm font-semibold">Populations</h2>
-        {POPS.map((p) => <p key={p} className="mt-1 text-[13px] text-neutral-500">• {p}</p>)}
-        <p className="mt-2 text-[11px] text-neutral-400">Back-translation: HI/KN strings drafted, independent back-translation + cognitive interviews required before claiming validation. Audio-first + WhatsApp channel planned for low-resource users.</p>
+        {POPS.map((p) => <p key={p} className="mt-1 text-[13px] text-[#5c564a]">• {p}</p>)}
+        <p className="mt-2 text-[11px] text-[#a39c8c]">Back-translation: HI/KN strings drafted, independent back-translation + cognitive interviews required before claiming validation. Audio-first + WhatsApp channel planned for low-resource users.</p>
       </section>
     </main>
   );

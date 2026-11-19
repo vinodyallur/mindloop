@@ -60,7 +60,7 @@ export default function Steadiness() {
   );
   if (phase === "done") return <Done saved={saved} offline={offline} />;
   return (
-    <main className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center gap-6 px-5">
+    <main className="mx-auto flex w-full max-w-[1400px] min-h-[70vh] max-w-lg flex-col items-center justify-center gap-6 px-5">
       <div className="relative h-40 w-40">
         <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
           <circle cx="50" cy="50" r="44" fill="none" strokeWidth="8" className="stroke-neutral-200" />
@@ -68,7 +68,7 @@ export default function Steadiness() {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-4xl font-semibold tabular-nums">{Math.ceil(DURATION_S - elapsed)}s</span>
-          <span className="text-xs text-neutral-400">hold still</span>
+          <span className="text-xs text-[#a39c8c]">hold still</span>
         </div>
       </div>
       {!supported && <p className="card p-3 text-xs text-amber-700">No motion sensor found — on desktop this records a flat baseline sample.</p>}
@@ -77,7 +77,7 @@ export default function Steadiness() {
           <div key={i} className="w-1.5 rounded-full bg-emerald-400" style={{ height: `${Math.min(100, Math.abs(m - 9.8) * 60 + 4)}%` }} />
         ))}
       </div>
-      <p className="font-mono text-xs text-neutral-400">live {live.toFixed(2)} m/s²</p>
+      <p className="font-mono text-xs text-[#a39c8c]">live {live.toFixed(2)} m/s²</p>
     </main>
   );
 }

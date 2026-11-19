@@ -17,10 +17,10 @@ export function useSubmit(taskKey: string) {
 export function Intro({ title, body, onStart, cta }: { title: string; body: string; onStart: () => void; cta?: string }) {
   const { t } = useLang();
   return (
-    <main className="mx-auto max-w-lg px-5 py-10">
+    <main className="mx-auto w-full max-w-[1400px] px-5 py-10">
       <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-3 text-[15px] leading-relaxed text-neutral-600">{body}</p>
-      <p className="mt-2 text-xs text-neutral-400">{t("practiceNote")}</p>
+      <p className="mt-3 text-[15px] leading-relaxed text-[#5c564a]">{body}</p>
+      <p className="mt-2 text-xs text-[#a39c8c]">{t("practiceNote")}</p>
       <button onClick={onStart} className="btn-primary mt-6">{cta ?? t("start")}</button>
     </main>
   );
@@ -29,14 +29,14 @@ export function Intro({ title, body, onStart, cta }: { title: string; body: stri
 export function Done({ saved, offline }: { saved: any; offline: boolean }) {
   const { t } = useLang();
   return (
-    <main className="mx-auto max-w-lg space-y-4 px-5 py-10">
+    <main className="mx-auto w-full max-w-[1400px] space-y-4 px-5 py-10">
       <h1 className="text-3xl font-semibold tracking-tight">{t("results")}</h1>
       {saved ? (
         <pre className="card overflow-auto p-4 font-mono text-xs">{JSON.stringify(saved.metrics, null, 2)}</pre>
       ) : offline ? (
         <p className="card p-4 text-sm text-amber-700">Backend offline — start the API to save &amp; score this session.</p>
-      ) : <p className="text-sm text-neutral-500">Saving…</p>}
-      <p className="text-xs text-neutral-400">Metrics are compared only with your own baseline. No composite score, no diagnosis.</p>
+      ) : <p className="text-sm text-[#5c564a]">Saving…</p>}
+      <p className="text-xs text-[#a39c8c]">Metrics are compared only with your own baseline. No composite score, no diagnosis.</p>
       <div className="flex gap-3">
         <Link href="/baseline" className="btn-primary">View baseline</Link>
         <Link href="/games" className="btn-ghost">More games</Link>

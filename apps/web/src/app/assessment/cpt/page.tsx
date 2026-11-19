@@ -178,13 +178,13 @@ export default function CPTPage() {
 
   if (phase === "intro") {
     return (
-      <div className="min-h-screen bg-[#fafafa] text-neutral-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#fafafa] text-[#23201a] flex items-center justify-center p-6">
         <div className="max-w-lg w-full text-center space-y-6">
           <div className="text-6xl">🎯</div>
           <h1 className="text-3xl font-bold">Continuous Performance Test</h1>
-          <p className="text-neutral-500 text-lg">Sustained Attention Assessment</p>
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 text-left space-y-3 text-neutral-600">
-            <h2 className="text-neutral-900 font-semibold text-lg">Instructions</h2>
+          <p className="text-[#5c564a] text-lg">Sustained Attention Assessment</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-left space-y-3 text-[#5c564a]">
+            <h2 className="text-[#23201a] font-semibold text-lg">Instructions</h2>
             <ul className="list-disc list-inside space-y-2">
               <li>Letters will appear one at a time on screen.</li>
               <li>
@@ -199,7 +199,7 @@ export default function CPTPage() {
           </div>
           <button
             onClick={startTest}
-            className="px-10 py-4 bg-neutral-900 hover:bg-black rounded-xl text-xl font-bold transition-colors text-white"
+            className="px-10 py-4 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl text-xl font-bold transition-colors text-white"
           >
             Start Test
           </button>
@@ -222,13 +222,13 @@ export default function CPTPage() {
       >
         {/* Progress bar */}
         <div className="w-full max-w-md mb-8">
-          <div className="flex justify-between text-sm text-neutral-500 mb-1">
+          <div className="flex justify-between text-sm text-[#5c564a] mb-1">
             <span>Progress</span>
             <span>{currentIndex + 1} / {TOTAL_STIMULI}</span>
           </div>
           <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-neutral-900 transition-all duration-300 rounded-full"
+              className="h-full bg-[#b3541e] transition-all duration-300 rounded-full"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -242,7 +242,7 @@ export default function CPTPage() {
                 ? "text-green-400"
                 : feedback === "error"
                 ? "text-red-400"
-                : "text-neutral-900"
+                : "text-[#23201a]"
             }`}
           >
             {currentLetter}
@@ -252,7 +252,7 @@ export default function CPTPage() {
         {/* TAP button */}
         <button
           onClick={handleResponse}
-          className="mb-12 w-40 h-40 rounded-full bg-neutral-900 hover:bg-black active:bg-neutral-700 text-white text-3xl font-black shadow-lg shadow-blue-600/30 transition-all active:scale-95 select-none"
+          className="mb-12 w-40 h-40 rounded-full bg-[#b3541e] hover:bg-[#9c4a1a] active:bg-neutral-700 text-white text-3xl font-black shadow-lg shadow-blue-600/30 transition-all active:scale-95 select-none"
         >
           TAP
         </button>
@@ -264,40 +264,40 @@ export default function CPTPage() {
 
   // Results
   return (
-    <div className="min-h-screen bg-[#fafafa] text-neutral-900 p-6">
+    <div className="min-h-screen bg-[#fafafa] text-[#23201a] p-6">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <div className="text-5xl">📊</div>
           <h1 className="text-3xl font-bold">CPT Results</h1>
-          <p className="text-neutral-500">Sustained Attention Performance</p>
+          <p className="text-[#5c564a]">Sustained Attention Performance</p>
         </div>
 
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 text-center"><p className="text-neutral-500">Compared only with your personal baseline — no composite score, no diagnosis.</p></div>
+        <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-center"><p className="text-[#5c564a]">Compared only with your personal baseline — no composite score, no diagnosis.</p></div>
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Accuracy</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Accuracy</p>
             <p className="text-2xl font-bold text-green-400">{accuracy.toFixed(1)}%</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Hits</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Hits</p>
             <p className="text-2xl font-bold text-blue-400">{hits}<span className="text-sm text-gray-500">/{totalTargets}</span></p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Misses</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Misses</p>
             <p className="text-2xl font-bold text-red-400">{misses}</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">False Alarms</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">False Alarms</p>
             <p className="text-2xl font-bold text-yellow-400">{falseAlarms}</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Avg RT</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Avg RT</p>
             <p className="text-2xl font-bold text-purple-400">{avgRT > 0 ? `${avgRT.toFixed(0)}ms` : "—"}</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">RT Variability</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">RT Variability</p>
             <p className="text-2xl font-bold text-orange-400">{rtVariability > 0 ? `${rtVariability.toFixed(0)}ms` : "—"}</p>
           </div>
         </div>
@@ -305,7 +305,7 @@ export default function CPTPage() {
         <div className="text-center">
           <a
             href="/assessment"
-            className="inline-block px-8 py-3 bg-neutral-900 hover:bg-black rounded-xl font-semibold transition-colors"
+            className="inline-block px-8 py-3 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl font-semibold transition-colors"
           >
             ← Back to Assessment
           </a>

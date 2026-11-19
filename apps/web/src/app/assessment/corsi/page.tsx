@@ -168,13 +168,13 @@ export default function CorsiPage() {
 
   if (phase === "intro") {
     return (
-      <div className="min-h-screen bg-[#fafafa] text-neutral-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#fafafa] text-[#23201a] flex items-center justify-center p-6">
         <div className="max-w-lg w-full text-center space-y-6">
           <div className="text-6xl">🧩</div>
           <h1 className="text-3xl font-bold">Corsi Block Tapping</h1>
-          <p className="text-neutral-500 text-lg">Visuospatial Working Memory</p>
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 text-left space-y-3 text-neutral-600">
-            <h2 className="text-neutral-900 font-semibold text-lg">Instructions</h2>
+          <p className="text-[#5c564a] text-lg">Visuospatial Working Memory</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-left space-y-3 text-[#5c564a]">
+            <h2 className="text-[#23201a] font-semibold text-lg">Instructions</h2>
             <ul className="list-disc list-inside space-y-2">
               <li>Watch the blocks as they light up in a sequence.</li>
               <li>After the sequence, tap the blocks in the <span className="font-bold text-yellow-400">SAME ORDER</span>.</li>
@@ -184,7 +184,7 @@ export default function CorsiPage() {
           </div>
           <button
             onClick={startTest}
-            className="px-10 py-4 bg-neutral-900 hover:bg-black rounded-xl text-xl font-bold transition-colors text-white"
+            className="px-10 py-4 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl text-xl font-bold transition-colors text-white"
           >
             Start Test
           </button>
@@ -195,16 +195,16 @@ export default function CorsiPage() {
 
   if (phase === "results") {
     return (
-      <div className="min-h-screen bg-[#fafafa] text-neutral-900 p-6">
+      <div className="min-h-screen bg-[#fafafa] text-[#23201a] p-6">
         <div className="max-w-2xl mx-auto space-y-8">
           <div className="text-center space-y-2">
             <div className="text-5xl">📊</div>
             <h1 className="text-3xl font-bold">Corsi Results</h1>
-            <p className="text-neutral-500">Visuospatial Working Memory</p>
+            <p className="text-[#5c564a]">Visuospatial Working Memory</p>
           </div>
 
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 text-center">
-            <p className="text-neutral-500 mb-2">Working Memory Metric (vs your baseline only)</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-center">
+            <p className="text-[#5c564a] mb-2">Working Memory Metric (vs your baseline only)</p>
             <p className="text-5xl font-black text-blue-400 mb-4">
               {wmScore}<span className="text-2xl text-gray-500">/100</span>
             </p>
@@ -220,22 +220,22 @@ export default function CorsiPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border border-neutral-200 rounded-xl p-5 text-center">
-              <p className="text-neutral-500 text-sm">Max Span</p>
+            <div className="bg-white border border-[#e5ddcc] rounded-xl p-5 text-center">
+              <p className="text-[#5c564a] text-sm">Max Span</p>
               <p className="text-4xl font-black text-purple-400">{finalMaxSpan}</p>
             </div>
-            <div className="bg-white border border-neutral-200 rounded-xl p-5 text-center">
-              <p className="text-neutral-500 text-sm">Total Correct</p>
+            <div className="bg-white border border-[#e5ddcc] rounded-xl p-5 text-center">
+              <p className="text-[#5c564a] text-sm">Total Correct</p>
               <p className="text-4xl font-black text-green-400">{totalCorrect}</p>
             </div>
           </div>
 
           {/* Trial history */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-5 space-y-2">
-            <h3 className="font-semibold text-neutral-600 mb-3">Trial History</h3>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-5 space-y-2">
+            <h3 className="font-semibold text-[#5c564a] mb-3">Trial History</h3>
             {results.map((r, i) => (
               <div key={i} className="flex justify-between items-center text-sm">
-                <span className="text-neutral-500">Span {r.spanLength}</span>
+                <span className="text-[#5c564a]">Span {r.spanLength}</span>
                 <span className={r.correct ? "text-green-400" : "text-red-400"}>
                   {r.correct ? "✓ Correct" : "✗ Incorrect"}
                 </span>
@@ -244,7 +244,7 @@ export default function CorsiPage() {
           </div>
 
           <div className="text-center">
-            <a href="/assessment" className="inline-block px-8 py-3 bg-neutral-900 hover:bg-black rounded-xl font-semibold transition-colors">
+            <a href="/assessment" className="inline-block px-8 py-3 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl font-semibold transition-colors">
               ← Back to Assessment
             </a>
           </div>
@@ -255,11 +255,11 @@ export default function CorsiPage() {
 
   // Showing / Responding / Feedback
   return (
-    <div className="min-h-screen bg-[#fafafa] text-neutral-900 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-[#fafafa] text-[#23201a] flex flex-col items-center p-6">
       {/* Status bar */}
       <div className="w-full max-w-md mb-4 flex justify-between items-center">
-        <span className="text-neutral-500">Span: <span className="text-neutral-900 font-bold">{spanLength}</span></span>
-        <span className="text-neutral-500">
+        <span className="text-[#5c564a]">Span: <span className="text-[#23201a] font-bold">{spanLength}</span></span>
+        <span className="text-[#5c564a]">
           {phase === "showing" && "👀 Watch..."}
           {phase === "responding" && `Tap: ${userSequence.length} / ${currentSequence.length}`}
           {phase === "feedback" && (feedbackCorrect ? "✓ Correct!" : "✗ Incorrect")}
@@ -267,7 +267,7 @@ export default function CorsiPage() {
       </div>
 
       {/* Grid area */}
-      <div className="relative w-full max-w-md aspect-square bg-white border border-neutral-200 rounded-2xl overflow-hidden">
+      <div className="relative w-full max-w-md aspect-square bg-white border border-[#e5ddcc] rounded-2xl overflow-hidden">
         {BLOCK_POSITIONS.map((pos, idx) => {
           const isHighlighted = highlightedBlock === idx;
           const isTapped = tappedBlock === idx;
@@ -284,7 +284,7 @@ export default function CorsiPage() {
                   : isTapped
                   ? "bg-blue-400 border-blue-300 scale-105"
                   : isInUserSeq && phase === "responding"
-                  ? "bg-neutral-900 border-blue-500"
+                  ? "bg-[#b3541e] border-blue-500"
                   : phase === "feedback" && feedbackCorrect
                   ? "bg-green-700 border-green-600"
                   : phase === "feedback" && !feedbackCorrect
@@ -297,7 +297,7 @@ export default function CorsiPage() {
               }}
             >
               {isInUserSeq && phase === "responding" && (
-                <span className="text-neutral-900 font-bold text-sm">
+                <span className="text-[#23201a] font-bold text-sm">
                   {userSequence.indexOf(idx) + 1}
                 </span>
               )}

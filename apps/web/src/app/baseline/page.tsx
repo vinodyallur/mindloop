@@ -9,7 +9,7 @@ const req = (p: string) => fetch(`${API}${p}`, { headers: { "x-api-key": KEY } }
 
 function band(v: number) {
   if (v >= 70) return { label: "Above your usual", cls: "text-emerald-700" };
-  if (v >= 40) return { label: "Around your usual", cls: "text-neutral-600" };
+  if (v >= 40) return { label: "Around your usual", cls: "text-[#5c564a]" };
   return { label: "Below your usual", cls: "text-amber-700" };
 }
 
@@ -27,19 +27,19 @@ export default function Baseline() {
   const idx = data?.index;
   const b = idx != null ? band(idx) : null;
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-5 py-8">
+    <main className="mx-auto w-full max-w-[1400px] space-y-6 px-5 py-8">
       <header>
-        <p className="text-xs font-medium uppercase tracking-widest text-neutral-400">Personal baseline</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Personal baseline</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Your Index</h1>
-        <p className="mt-1 max-w-xl text-sm text-neutral-500">0 = far below your usual pattern · 50 = at your baseline median · 100 = far above. Descriptive only — never a diagnosis.</p>
+        <p className="mt-1 max-w-xl text-sm text-[#5c564a]">0 = far below your usual pattern · 50 = at your baseline median · 100 = far above. Descriptive only — never a diagnosis.</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
-        <select value={task} onChange={(e) => setTask(e.target.value)} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm">
+        <select value={task} onChange={(e) => setTask(e.target.value)} className="rounded-full border border-[#e5ddcc] bg-white px-4 py-2 text-sm">
           <option value="">All tasks</option>
           {tasks.map((t) => <option key={String(t)} value={String(t)}>{String(t)}</option>)}
         </select>
-        <select value={metric} onChange={(e) => setMetric(e.target.value)} className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm">
+        <select value={metric} onChange={(e) => setMetric(e.target.value)} className="rounded-full border border-[#e5ddcc] bg-white px-4 py-2 text-sm">
           <option value="">All metrics</option>
           {["accuracy", "median_rt_ms", "rt_variability_ms", "omissions", "commissions", "hit_rate", "steadiness_score", "sway_variability"].map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
@@ -55,13 +55,13 @@ export default function Baseline() {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-5xl font-semibold tabular-nums tracking-tight">{Math.round(idx)}</span>
-                <span className="text-xs text-neutral-400">/ 100</span>
+                <span className="text-xs text-[#a39c8c]">/ 100</span>
               </div>
             </div>
             <p className={`text-sm font-medium ${b!.cls}`}>{b!.label}</p>
-            {data?.trend_delta != null && <p className="text-xs text-neutral-400">Trend {data.trend_delta >= 0 ? "+" : ""}{data.trend_delta} vs earlier half · {data.sessions} sessions · {data.confidence}</p>}
+            {data?.trend_delta != null && <p className="text-xs text-[#a39c8c]">Trend {data.trend_delta >= 0 ? "+" : ""}{data.trend_delta} vs earlier half · {data.sessions} sessions · {data.confidence}</p>}
           </>
-        ) : <p className="py-8 text-sm text-neutral-500">Complete a few tasks to build your baseline — 3–5 valid sessions across days.</p>}
+        ) : <p className="py-8 text-sm text-[#5c564a]">Complete a few tasks to build your baseline — 3–5 valid sessions across days.</p>}
       </section>
 
       {series.length > 1 && (
@@ -85,9 +85,9 @@ export default function Baseline() {
           <h2 className="text-sm font-semibold">Metric baselines</h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {data.baselines.map((x: any) => (
-              <div key={x.task_key + x.metric_key} className="rounded-xl bg-neutral-50 px-4 py-3 text-[13px]">
+              <div key={x.task_key + x.metric_key} className="rounded-xl bg-[#faf6ec] px-4 py-3 text-[13px]">
                 <span className="font-medium">{x.task_key} · {x.metric_key}</span>
-                <span className="text-neutral-500"> — median {x.centre}, MAD {x.variability_mad}, {x.valid_sessions} sessions ({x.confidence})</span>
+                <span className="text-[#5c564a]"> — median {x.centre}, MAD {x.variability_mad}, {x.valid_sessions} sessions ({x.confidence})</span>
               </div>
             ))}
           </div>
@@ -96,16 +96,16 @@ export default function Baseline() {
 
       {data?.forecast && Object.keys(data.forecast.models || {}).length > 0 && (
         <section className="card p-5">
-          <h2 className="text-sm font-semibold">Core ML forecast <span className="font-normal text-neutral-400">(trained on your history)</span></h2>
+          <h2 className="text-sm font-semibold">Core ML forecast <span className="font-normal text-[#a39c8c]">(trained on your history)</span></h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {Object.entries(data.forecast.models).slice(0, 6).map(([k, m]: any) => (
-              <div key={k} className="rounded-xl bg-neutral-50 px-4 py-3 text-[13px]">
+              <div key={k} className="rounded-xl bg-[#faf6ec] px-4 py-3 text-[13px]">
                 <span className="font-medium">{k}</span>
-                <span className="text-neutral-500"> — next ≈ {m.forecast} (range {m.band?.[0]}–{m.band?.[1]}), n={m.n}</span>
+                <span className="text-[#5c564a]"> — next ≈ {m.forecast} (range {m.band?.[0]}–{m.band?.[1]}), n={m.n}</span>
               </div>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-neutral-400">{data.forecast.note}</p>
+          <p className="mt-2 text-[11px] text-[#a39c8c]">{data.forecast.note}</p>
         </section>
       )}
 

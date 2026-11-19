@@ -128,13 +128,13 @@ export default function ReactionTimePage() {
 
   if (phase === "intro") {
     return (
-      <div className="min-h-screen bg-[#fafafa] text-neutral-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#fafafa] text-[#23201a] flex items-center justify-center p-6">
         <div className="max-w-lg w-full text-center space-y-6">
           <div className="text-6xl">⚡</div>
           <h1 className="text-3xl font-bold">Reaction Time Test</h1>
-          <p className="text-neutral-500 text-lg">Processing Speed Assessment</p>
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 text-left space-y-3 text-neutral-600">
-            <h2 className="text-neutral-900 font-semibold text-lg">Instructions</h2>
+          <p className="text-[#5c564a] text-lg">Processing Speed Assessment</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-left space-y-3 text-[#5c564a]">
+            <h2 className="text-[#23201a] font-semibold text-lg">Instructions</h2>
             <ul className="list-disc list-inside space-y-2">
               <li>A large circle will appear in the center.</li>
               <li>Wait while the circle is <span className="font-bold text-red-400">RED</span>.</li>
@@ -145,7 +145,7 @@ export default function ReactionTimePage() {
           </div>
           <button
             onClick={startTest}
-            className="px-10 py-4 bg-neutral-900 hover:bg-black rounded-xl text-xl font-bold transition-colors text-white"
+            className="px-10 py-4 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl text-xl font-bold transition-colors text-white"
           >
             Start Test
           </button>
@@ -156,15 +156,15 @@ export default function ReactionTimePage() {
 
   if (phase === "testing") {
     return (
-      <div className="min-h-screen bg-[#fafafa] text-neutral-900 flex flex-col items-center justify-center p-6 select-none">
+      <div className="min-h-screen bg-[#fafafa] text-[#23201a] flex flex-col items-center justify-center p-6 select-none">
         {/* Progress */}
         <div className="w-full max-w-md mb-8">
-          <div className="flex justify-between text-sm text-neutral-500 mb-1">
+          <div className="flex justify-between text-sm text-[#5c564a] mb-1">
             <span>Trial {Math.min(currentTrial + 1, TOTAL_TRIALS)} of {TOTAL_TRIALS}</span>
             <span>Valid: {validRTs.length}</span>
           </div>
           <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full bg-neutral-900 rounded-full transition-all" style={{ width: `${(validRTs.length / TOTAL_TRIALS) * 100}%` }} />
+            <div className="h-full bg-[#b3541e] rounded-full transition-all" style={{ width: `${(validRTs.length / TOTAL_TRIALS) * 100}%` }} />
           </div>
         </div>
 
@@ -179,7 +179,7 @@ export default function ReactionTimePage() {
               : "bg-red-600 shadow-red-600/40 cursor-pointer"
           }`}
         >
-          <span className="text-neutral-900 font-bold text-lg">
+          <span className="text-[#23201a] font-bold text-lg">
             {trialPhase === "green" ? "TAP!" : trialPhase === "recorded" ? `${lastRT?.toFixed(0)}ms` : "WAIT"}
           </span>
         </button>
@@ -208,16 +208,16 @@ export default function ReactionTimePage() {
 
   // Results
   return (
-    <div className="min-h-screen bg-[#fafafa] text-neutral-900 p-6">
+    <div className="min-h-screen bg-[#fafafa] text-[#23201a] p-6">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <div className="text-5xl">📊</div>
           <h1 className="text-3xl font-bold">Reaction Time Results</h1>
-          <p className="text-neutral-500">Processing Speed Performance</p>
+          <p className="text-[#5c564a]">Processing Speed Performance</p>
         </div>
 
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 text-center">
-          <p className="text-neutral-500 mb-2">Processing Speed Score</p>
+        <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-center">
+          <p className="text-[#5c564a] mb-2">Processing Speed Score</p>
           <p className="text-5xl font-black text-blue-400 mb-4">
             {score}<span className="text-2xl text-gray-500">/100</span>
           </p>
@@ -233,35 +233,35 @@ export default function ReactionTimePage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Mean RT</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Mean RT</p>
             <p className="text-2xl font-bold text-purple-400">{meanRT.toFixed(0)}ms</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Median RT</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Median RT</p>
             <p className="text-2xl font-bold text-blue-400">{medianRT.toFixed(0)}ms</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Fastest</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Fastest</p>
             <p className="text-2xl font-bold text-green-400">{fastestRT.toFixed(0)}ms</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Slowest</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Slowest</p>
             <p className="text-2xl font-bold text-orange-400">{slowestRT.toFixed(0)}ms</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">RT Variability</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">RT Variability</p>
             <p className="text-2xl font-bold text-yellow-400">{rtVar.toFixed(0)}ms</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Early Taps</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Early Taps</p>
             <p className="text-2xl font-bold text-red-400">{earlyClicks}</p>
           </div>
         </div>
 
         {/* Individual trials */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-5">
-          <h3 className="font-semibold text-neutral-600 mb-3">Trial Breakdown</h3>
+        <div className="bg-white border border-[#e5ddcc] rounded-xl p-5">
+          <h3 className="font-semibold text-[#5c564a] mb-3">Trial Breakdown</h3>
           <div className="space-y-2">
             {validRTs.map((rt, i) => (
               <div key={i} className="flex items-center gap-3">
@@ -275,14 +275,14 @@ export default function ReactionTimePage() {
                     }}
                   />
                 </div>
-                <span className="text-neutral-600 text-sm w-16 text-right">{rt.toFixed(0)}ms</span>
+                <span className="text-[#5c564a] text-sm w-16 text-right">{rt.toFixed(0)}ms</span>
               </div>
             ))}
           </div>
         </div>
 
         <div className="text-center">
-          <a href="/assessment" className="inline-block px-8 py-3 bg-neutral-900 hover:bg-black rounded-xl font-semibold transition-colors">
+          <a href="/assessment" className="inline-block px-8 py-3 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl font-semibold transition-colors">
             ← Back to Assessment
           </a>
         </div>

@@ -14,22 +14,22 @@ const STUDIES = [
 
 export default function Evidence() {
   return (
-    <main className="mx-auto max-w-3xl space-y-5 px-5 py-8">
+    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-5 py-8">
       <header>
-        <p className="text-xs font-medium uppercase tracking-widest text-neutral-400">Q6 — sustained evidence</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Q6 — sustained evidence</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Evidence dossier</h1>
-        <p className="mt-1 text-sm text-neutral-500">What durable digital-health evidence actually shows — and what MindLoop honestly borrows vs still must prove.</p>
+        <p className="mt-1 text-sm text-[#5c564a]">What durable digital-health evidence actually shows — and what MindLoop honestly borrows vs still must prove.</p>
       </header>
       {STUDIES.map((s) => (
         <a key={s.t} href={s.u} target="_blank" rel="noreferrer" className="card block p-5 transition hover:-translate-y-0.5">
           <p className="text-sm font-semibold">{s.t}</p>
-          <p className="mt-1 text-xs text-neutral-400">{s.s}</p>
-          <p className="mt-1 text-[13px] text-neutral-500">{s.c}</p>
+          <p className="mt-1 text-xs text-[#a39c8c]">{s.s}</p>
+          <p className="mt-1 text-[13px] text-[#5c564a]">{s.c}</p>
         </a>
       ))}
       <section className="card p-5">
         <h2 className="text-sm font-semibold">MindLoop durability tracker (this app)</h2>
-        <p className="mt-1 text-[13px] text-neutral-500">Status: collecting. 30/90/180-day windows + waitlist arm + ITT export are built (<code>/api/v1/outcomes/windows</code>, <code>/api/v1/study/export</code>). No long-term claims until the data exists — see Outcomes → 30-day set.</p>
+        <p className="mt-1 text-[13px] text-[#5c564a]">Status: collecting. 30/90/180-day windows + waitlist arm + ITT export are built (<code>/api/v1/outcomes/windows</code>, <code>/api/v1/study/export</code>). No long-term claims until the data exists — see Outcomes → 30-day set.</p>
       </section>
     </main>
   );

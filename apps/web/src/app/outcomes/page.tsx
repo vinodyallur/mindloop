@@ -16,17 +16,17 @@ export default function Outcomes() {
   const [hist, setHist] = useState<any[]>([]);
   useEffect(() => { getInstruments().then(setSpecs); get30Day().then(setD30); getOutcomeHistory("srbai").then((h) => h && setHist(h)); }, []);
   useEffect(() => { setAnswers(specs ? Array(specs[inst].questions.length).fill(Math.floor(specs[inst].scale.length / 2)) : []); setRes(null); }, [inst, specs]);
-  if (!specs) return <main className="px-5 py-10 text-sm text-neutral-500">Loading…</main>;
+  if (!specs) return <main className="px-5 py-10 text-sm text-[#5c564a]">Loading…</main>;
   const spec = specs[inst];
   return (
-    <main className="mx-auto max-w-3xl space-y-5 px-5 py-8">
+    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-5 py-8">
       <header>
-        <p className="text-xs font-medium uppercase tracking-widest text-neutral-400">Q1 · Q4 — measurable outcomes</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Q1 · Q4 — measurable outcomes</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Wellbeing check</h1>
-        <p className="mt-1 text-sm text-neutral-500">Validated self-report scales. Context only — not a diagnosis. {BCT}.</p>
+        <p className="mt-1 text-sm text-[#5c564a]">Validated self-report scales. Context only — not a diagnosis. {BCT}.</p>
       </header>
       <div className="flex flex-wrap gap-2">
-        {Object.keys(specs).map((k) => <button key={k} onClick={() => setInst(k)} className={`rounded-full px-4 py-1.5 text-sm transition ${inst === k ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600"}`}>{NAMES[k]}</button>)}
+        {Object.keys(specs).map((k) => <button key={k} onClick={() => setInst(k)} className={`rounded-full px-4 py-1.5 text-sm transition ${inst === k ? "bg-[#b3541e] text-white" : "bg-[#f1ecdd] text-[#5c564a]"}`}>{NAMES[k]}</button>)}
       </div>
       <section className="card space-y-3 p-5">
         {spec.questions.map((q: string, i: number) => (
@@ -35,26 +35,26 @@ export default function Outcomes() {
           </label>
         ))}
         <button className="btn-primary" onClick={async () => { const r = await submitSurvey(inst, answers); setRes(r); setD30(await get30Day()); }}>Save {NAMES[inst]}</button>
-        {res && <p className="text-sm text-neutral-600">Score {res.score}/{res.max}. {res.flag ? res.flag.message : res.note}</p>}
+        {res && <p className="text-sm text-[#5c564a]">Score {res.score}/{res.max}. {res.flag ? res.flag.message : res.note}</p>}
       </section>
       {d30 && (
         <section className="card p-5">
           <h2 className="text-sm font-semibold">30-day evaluation set</h2>
           {Object.entries(d30).filter(([k]) => !k.startsWith("_")).map(([k, v]: any) => (
-            <p key={k} className="mt-1 text-[13px] text-neutral-500">{NAMES[k] ?? k}: {v.baseline} → {v.latest} (Δ {v.delta >= 0 ? "+" : ""}{v.delta}, n={v.n})</p>
+            <p key={k} className="mt-1 text-[13px] text-[#5c564a]">{NAMES[k] ?? k}: {v.baseline} → {v.latest} (Δ {v.delta >= 0 ? "+" : ""}{v.delta}, n={v.n})</p>
           ))}
-          <p className="mt-1 text-[13px] text-neutral-500">Behavior: {d30._behavior?.target_days_met}/{d30._behavior?.active_days} target days ({d30._behavior?.maintenance_pct}%)</p>
-          <p className="mt-2 text-[11px] text-neutral-400">Thresholds: {Object.entries(d30._thresholds || {}).map(([k, v]) => `${k} ${v}`).join(" · ")}</p>
+          <p className="mt-1 text-[13px] text-[#5c564a]">Behavior: {d30._behavior?.target_days_met}/{d30._behavior?.active_days} target days ({d30._behavior?.maintenance_pct}%)</p>
+          <p className="mt-2 text-[11px] text-[#a39c8c]">Thresholds: {Object.entries(d30._thresholds || {}).map(([k, v]) => `${k} ${v}`).join(" · ")}</p>
         </section>
       )}
       {hist.length > 0 && (
         <section className="card p-5">
-          <h2 className="text-sm font-semibold">Habit automaticity (SRBAI) <span className="font-normal text-neutral-400">0 → 30 → 90 days, Lally 2010</span></h2>
+          <h2 className="text-sm font-semibold">Habit automaticity (SRBAI) <span className="font-normal text-[#a39c8c]">0 → 30 → 90 days, Lally 2010</span></h2>
           <div className="mt-2 flex items-end gap-1.5">
             {hist.map((h: any, i: number) => (
               <div key={i} className="flex flex-1 flex-col items-center gap-1">
-                <div className="w-full rounded-t-lg bg-neutral-900" style={{ height: `${Math.max(6, (h.score / h.max) * 120)}px` }} />
-                <span className="text-[10px] text-neutral-400">{h.score}</span>
+                <div className="w-full rounded-t-lg bg-[#b3541e]" style={{ height: `${Math.max(6, (h.score / h.max) * 120)}px` }} />
+                <span className="text-[10px] text-[#a39c8c]">{h.score}</span>
               </div>
             ))}
           </div>

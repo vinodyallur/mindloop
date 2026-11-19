@@ -157,13 +157,13 @@ export default function StroopPage() {
 
   if (phase === "intro") {
     return (
-      <div className="min-h-screen bg-[#fafafa] text-neutral-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#fafafa] text-[#23201a] flex items-center justify-center p-6">
         <div className="max-w-lg w-full text-center space-y-6">
           <div className="text-6xl">🎨</div>
           <h1 className="text-3xl font-bold">Stroop Color Test</h1>
-          <p className="text-neutral-500 text-lg">Cognitive Inhibition Assessment</p>
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 text-left space-y-3 text-neutral-600">
-            <h2 className="text-neutral-900 font-semibold text-lg">Instructions</h2>
+          <p className="text-[#5c564a] text-lg">Cognitive Inhibition Assessment</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-left space-y-3 text-[#5c564a]">
+            <h2 className="text-[#23201a] font-semibold text-lg">Instructions</h2>
             <ul className="list-disc list-inside space-y-2">
               <li>A color word will appear on screen in a colored ink.</li>
               <li>
@@ -180,7 +180,7 @@ export default function StroopPage() {
           </div>
           <button
             onClick={startTest}
-            className="px-10 py-4 bg-neutral-900 hover:bg-black rounded-xl text-xl font-bold transition-colors text-white"
+            className="px-10 py-4 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl text-xl font-bold transition-colors text-white"
           >
             Start Test
           </button>
@@ -203,12 +203,12 @@ export default function StroopPage() {
       >
         {/* Progress */}
         <div className="w-full max-w-md">
-          <div className="flex justify-between text-sm text-neutral-500 mb-1">
+          <div className="flex justify-between text-sm text-[#5c564a] mb-1">
             <span>Trial {currentIndex + 1} of {TOTAL_TRIALS}</span>
             <span>{feedback === "correct" ? "✓ Correct" : feedback === "wrong" ? "✗ Wrong" : ""}</span>
           </div>
           <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full bg-neutral-900 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-[#b3541e] rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
@@ -228,7 +228,7 @@ export default function StroopPage() {
             <button
               key={c.name}
               onClick={() => handleColorResponse(c.name)}
-              className="py-5 rounded-xl text-xl font-bold text-neutral-900 transition-all active:scale-95 hover:opacity-90"
+              className="py-5 rounded-xl text-xl font-bold text-[#23201a] transition-all active:scale-95 hover:opacity-90"
               style={{ backgroundColor: c.hex }}
             >
               {c.name}
@@ -242,17 +242,17 @@ export default function StroopPage() {
 
   // Results
   return (
-    <div className="min-h-screen bg-[#fafafa] text-neutral-900 p-6">
+    <div className="min-h-screen bg-[#fafafa] text-[#23201a] p-6">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <div className="text-5xl">📊</div>
           <h1 className="text-3xl font-bold">Stroop Test Results</h1>
-          <p className="text-neutral-500">Cognitive Inhibition Performance</p>
+          <p className="text-[#5c564a]">Cognitive Inhibition Performance</p>
         </div>
 
         {/* Inhibition Score */}
-        <div className="bg-white border border-neutral-200 rounded-xl p-6 text-center">
-          <p className="text-neutral-500 mb-2">Inhibition Metric (vs your baseline only)</p>
+        <div className="bg-white border border-[#e5ddcc] rounded-xl p-6 text-center">
+          <p className="text-[#5c564a] mb-2">Inhibition Metric (vs your baseline only)</p>
           <p className="text-5xl font-black text-purple-400 mb-4">
             {inhibitionScore}<span className="text-2xl text-gray-500">/100</span>
           </p>
@@ -268,44 +268,44 @@ export default function StroopPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Overall Accuracy</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Overall Accuracy</p>
             <p className="text-2xl font-bold text-green-400">{overallAccuracy.toFixed(1)}%</p>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-4 text-center">
-            <p className="text-neutral-500 text-sm">Interference</p>
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-4 text-center">
+            <p className="text-[#5c564a] text-sm">Interference</p>
             <p className="text-2xl font-bold text-yellow-400">{interferenceScore.toFixed(0)}ms</p>
           </div>
         </div>
 
         {/* Congruent vs Incongruent */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white border border-neutral-200 rounded-xl p-5 space-y-3">
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-5 space-y-3">
             <h3 className="text-center font-semibold text-green-400">Congruent</h3>
             <div className="text-center">
-              <p className="text-neutral-500 text-sm">Accuracy</p>
+              <p className="text-[#5c564a] text-sm">Accuracy</p>
               <p className="text-xl font-bold">{congAccuracy.toFixed(1)}%</p>
             </div>
             <div className="text-center">
-              <p className="text-neutral-500 text-sm">Avg RT</p>
+              <p className="text-[#5c564a] text-sm">Avg RT</p>
               <p className="text-xl font-bold">{avgCongRT > 0 ? `${avgCongRT.toFixed(0)}ms` : "—"}</p>
             </div>
           </div>
-          <div className="bg-white border border-neutral-200 rounded-xl p-5 space-y-3">
+          <div className="bg-white border border-[#e5ddcc] rounded-xl p-5 space-y-3">
             <h3 className="text-center font-semibold text-red-400">Incongruent</h3>
             <div className="text-center">
-              <p className="text-neutral-500 text-sm">Accuracy</p>
+              <p className="text-[#5c564a] text-sm">Accuracy</p>
               <p className="text-xl font-bold">{incongAccuracy.toFixed(1)}%</p>
             </div>
             <div className="text-center">
-              <p className="text-neutral-500 text-sm">Avg RT</p>
+              <p className="text-[#5c564a] text-sm">Avg RT</p>
               <p className="text-xl font-bold">{avgIncongRT > 0 ? `${avgIncongRT.toFixed(0)}ms` : "—"}</p>
             </div>
           </div>
         </div>
 
         <div className="text-center">
-          <a href="/assessment" className="inline-block px-8 py-3 bg-neutral-900 hover:bg-black rounded-xl font-semibold transition-colors">
+          <a href="/assessment" className="inline-block px-8 py-3 bg-[#b3541e] hover:bg-[#9c4a1a] rounded-xl font-semibold transition-colors">
             ← Back to Assessment
           </a>
         </div>

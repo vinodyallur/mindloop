@@ -20,26 +20,26 @@ function Shell({ children }: { children: React.ReactNode }) {
   ];
   return (
     <body className="min-h-screen antialiased">
-      <header className="sticky top-0 z-40 border-b border-neutral-200/70 bg-[#fafafa]/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-5 py-3">
+      <header className="sticky top-0 z-40 border-b border-[#e5ddcc] bg-[#f7f4ec]/90 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-[1400px] max-w-5xl items-center justify-between gap-2 px-5 py-3">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white">M</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b3541e] text-sm font-bold text-white">M</span>
             <span className="text-[17px] font-semibold tracking-tight">MindLoop</span>
           </Link>
           <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Primary">
             {nav.map((n) => (
-              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-neutral-500 transition hover:bg-neutral-200/60 hover:text-neutral-900">
+              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-[#5c564a] transition hover:bg-[#f1ecdd] hover:text-[#23201a]">
                 {n.label}
               </Link>
             ))}
           </nav>
-          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label="Language" className="rounded-full border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600 outline-none">
+          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label="Language" className="rounded-full border border-[#e5ddcc] bg-white px-2.5 py-1.5 text-xs font-medium text-[#5c564a] outline-none">
             {LANGS.map((l) => <option key={l} value={l}>{LANG_LABEL[l]}</option>)}
           </select>
         </div>
       </header>
       <div className="pb-24">{children}</div>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200/70 bg-white/90 backdrop-blur-md sm:hidden" aria-label="Mobile">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e5ddcc] bg-[#fffdf7]/95 backdrop-blur-md sm:hidden" aria-label="Mobile">
         <div className="grid grid-cols-5 px-2 py-2">
           {[
             { href: "/", label: t("home") },
@@ -48,13 +48,13 @@ function Shell({ children }: { children: React.ReactNode }) {
             { href: "/dashboard", label: t("stats") },
             { href: "/settings", label: t("settings") },
           ].map((n) => (
-            <Link key={n.href} href={n.href} className="rounded-xl py-2 text-center text-[11px] font-medium text-neutral-500 active:bg-neutral-100">
+            <Link key={n.href} href={n.href} className="rounded-xl py-2 text-center text-[11px] font-medium text-[#5c564a] active:bg-[#f1ecdd]">
               {n.label}
             </Link>
           ))}
         </div>
       </nav>
-      <footer className="border-t border-neutral-200/70 py-6 text-center text-xs text-neutral-400">
+      <footer className="border-t border-[#e5ddcc] py-6 text-center text-xs text-[#a39c8c]">
         MindLoop · {t("notDiagnosis")}
       </footer>
     </body>

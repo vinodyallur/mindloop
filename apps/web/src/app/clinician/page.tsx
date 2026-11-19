@@ -16,27 +16,27 @@ export default function Clinician() {
     getBehavior().then(setBeh);
   }, []);
   return (
-    <main className="mx-auto max-w-4xl space-y-5 px-5 py-8">
+    <main className="mx-auto w-full max-w-[1400px] space-y-5 px-5 py-8">
       <header>
-        <p className="text-xs font-medium uppercase tracking-widest text-neutral-400">Q8 — clinician review</p>
+        <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Q8 — clinician review</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Review queue</h1>
-        <p className="mt-1 text-sm text-neutral-500">Decision support only. You own the clinical decision; the vendor owns software performance. Response: crisis same-day · moderate within days · routine via reminders.</p>
+        <p className="mt-1 text-sm text-[#5c564a]">Decision support only. You own the clinical decision; the vendor owns software performance. Response: crisis same-day · moderate within days · routine via reminders.</p>
       </header>
       <section className="card p-5">
         <h2 className="text-sm font-semibold">Flags awaiting review ({flags.length})</h2>
-        {flags.map((f: any) => <p key={f.id} className="mt-1 text-[13px] text-neutral-600">[{f.tier}] {f.detail} <span className="text-neutral-400">· {f.status} · {f.at}</span></p>)}
-        {!flags.length && <p className="text-sm text-neutral-400">Queue clear.</p>}
+        {flags.map((f: any) => <p key={f.id} className="mt-1 text-[13px] text-[#5c564a]">[{f.tier}] {f.detail} <span className="text-[#a39c8c]">· {f.status} · {f.at}</span></p>)}
+        {!flags.length && <p className="text-sm text-[#a39c8c]">Queue clear.</p>}
       </section>
       <section className="card p-5">
         <h2 className="text-sm font-semibold">Overdue referrals ({overdue.length})</h2>
-        {overdue.map((o: any) => <p key={o.id} className="mt-1 text-[13px] text-neutral-600">{o.needs_attention ? "🔴" : "🟡"} {o.reason} · {o.state} · {o.attempts} attempts · owner {o.owner}</p>)}
-        {!overdue.length && <p className="text-sm text-neutral-400">No stalled referrals.</p>}
+        {overdue.map((o: any) => <p key={o.id} className="mt-1 text-[13px] text-[#5c564a]">{o.needs_attention ? "🔴" : "🟡"} {o.reason} · {o.state} · {o.attempts} attempts · owner {o.owner}</p>)}
+        {!overdue.length && <p className="text-sm text-[#a39c8c]">No stalled referrals.</p>}
       </section>
       <section className="grid gap-3 sm:grid-cols-2">
         <div className="card p-5"><h2 className="text-sm font-semibold">30-day outcomes</h2>
-          {d30 ? Object.entries(d30).filter(([k]) => !k.startsWith("_")).map(([k, v]: any) => <p key={k} className="mt-1 text-[13px] text-neutral-500">{k}: {v.baseline} → {v.latest} (Δ{v.delta})</p>) : <p className="text-sm text-neutral-400">No data yet.</p>}</div>
+          {d30 ? Object.entries(d30).filter(([k]) => !k.startsWith("_")).map(([k, v]: any) => <p key={k} className="mt-1 text-[13px] text-[#5c564a]">{k}: {v.baseline} → {v.latest} (Δ{v.delta})</p>) : <p className="text-sm text-[#a39c8c]">No data yet.</p>}</div>
         <div className="card p-5"><h2 className="text-sm font-semibold">Behavior (Q1)</h2>
-          {beh ? <><p className="mt-1 text-[13px] text-neutral-500">Fruit/veg {beh.fruit_veg_servings}/day · active {beh.active_minutes} min · sleep {beh.sleep_hours_self}h</p><p className="mt-1 text-[13px] text-neutral-500">Steps 7d: {(beh.steps_7d || []).join(", ") || "—"}</p></> : <p className="text-sm text-neutral-400">No check-ins yet.</p>}</div>
+          {beh ? <><p className="mt-1 text-[13px] text-[#5c564a]">Fruit/veg {beh.fruit_veg_servings}/day · active {beh.active_minutes} min · sleep {beh.sleep_hours_self}h</p><p className="mt-1 text-[13px] text-[#5c564a]">Steps 7d: {(beh.steps_7d || []).join(", ") || "—"}</p></> : <p className="text-sm text-[#a39c8c]">No check-ins yet.</p>}</div>
       </section>
     </main>
   );

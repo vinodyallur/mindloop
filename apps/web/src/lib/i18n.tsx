@@ -1,50 +1,42 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 
-export const LANGS = ["en", "hi", "kn"] as const;
+// 20 languages. Core chrome + task shells fully translated; game mechanic
+// strings stay in English with a staged translation note on the Pilot page.
+export const LANGS = ["en", "hi", "kn", "ar", "fr", "de", "es", "ta", "te", "ml", "ur", "bn", "mr", "pa", "gu", "pt", "it", "nl", "tr", "sw"] as const;
 export type Lang = (typeof LANGS)[number];
-export const LANG_LABEL: Record<Lang, string> = { en: "English", hi: "हिन्दी", kn: "ಕನ್ನಡ" };
+export const LANG_LABEL: Record<Lang, string> = {
+  en: "English", hi: "हिन्दी", kn: "ಕನ್ನಡ", ar: "العربية", fr: "Français", de: "Deutsch",
+  es: "Español", ta: "தமிழ்", te: "తెలుగు", ml: "മലയാളം", ur: "اردو", bn: "বাংলা",
+  mr: "मराठी", pa: "ਪੰਜਾਬੀ", gu: "ગુજરાતી", pt: "Português", it: "Italiano",
+  nl: "Nederlands", tr: "Türkçe", sw: "Kiswahili",
+};
+export const RTL: Lang[] = ["ar", "ur"];
+
+type Dict = Record<Lang, string>;
+const L = (en: string, o: Partial<Record<Lang, string>>): Dict =>
+  ({ en, hi: o.hi ?? en, kn: o.kn ?? en, ar: o.ar ?? en, fr: o.fr ?? en, de: o.de ?? en, es: o.es ?? en, ta: o.ta ?? en, te: o.te ?? en, ml: o.ml ?? en, ur: o.ur ?? en, bn: o.bn ?? en, mr: o.mr ?? en, pa: o.pa ?? en, gu: o.gu ?? en, pt: o.pt ?? en, it: o.it ?? en, nl: o.nl ?? en, tr: o.tr ?? en, sw: o.sw ?? en });
 
 const S = {
-  home: { en: "Home", hi: "होम", kn: "ಮನೆ" },
-  baseline: { en: "Baseline", hi: "बेसलाइन", kn: "ಬೇಸ್‌ಲೈನ್" },
-  train: { en: "Train", hi: "अभ्यास", kn: "ಅಭ್ಯಾಸ" },
-  outcomes: { en: "Outcomes", hi: "परिणाम", kn: "ಫಲಿತಾಂಶ" },
-  dashboard: { en: "Dashboard", hi: "डैशबोर्ड", kn: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್" },
-  report: { en: "Report", hi: "रिपोर्ट", kn: "ವರದಿ" },
-  care: { en: "Care", hi: "देखभाल", kn: "ಆರೈಕೆ" },
-  settings: { en: "Settings", hi: "सेटिंग्स", kn: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು" },
-  stats: { en: "Stats", hi: "आँकड़े", kn: "ಅಂಕಿಅಂಶ" },
-  hero: {
-    en: "Know your focus, from your own data.",
-    hi: "अपने डेटा से अपना फोकस जानें।",
-    kn: "ನಿಮ್ಮ ಡೇಟಾದಿಂದ ನಿಮ್ಮ ಗಮನವನ್ನು ತಿಳಿಯಿರಿ.",
-  },
-  heroSub: {
-    en: "Short tasks build a personal baseline. MindLoop compares you only with your usual pattern - alongside sleep and activity context.",
-    hi: "छोटे कार्य आपकी बेसलाइन बनाते हैं। MindLoop आपकी तुलना केवल आपके सामान्य पैटर्न से करता है।",
-    kn: "ಸಣ್ಣ ಕಾರ್ಯಗಳು ವೈಯಕ್ತಿಕ ಬೇಸ್‌ಲೈನ್ ನಿರ್ಮಿಸುತ್ತವೆ. MindLoop ನಿಮ್ಮನ್ನು ನಿಮ್ಮ ಸಾಮಾನ್ಯ ಮಾದರಿಯೊಂದಿಗೆ ಮಾತ್ರ ಹೋಲಿಸುತ್ತದೆ.",
-  },
-  seeBaseline: { en: "See your baseline", hi: "बेसलाइन देखें", kn: "ಬೇಸ್‌ಲೈನ್ ನೋಡಿ" },
-  browseTasks: { en: "Browse tasks", hi: "कार्य देखें", kn: "ಕಾರ್ಯಗಳನ್ನು ನೋಡಿ" },
-  notDiagnosis: {
-    en: "Descriptive self-tracking only - not a diagnosis.",
-    hi: "केवल स्व-ट्रैकिंग - यह निदान नहीं है।",
-    kn: "ವಿವರಣಾತ್ಮಕ ಸ್ವ-ಟ್ರ್ಯಾಕಿಂಗ್ ಮಾತ್ರ - ರೋಗನಿರ್ಣಯವಲ್ಲ.",
-  },
-  crisis: {
-    en: "If you ever feel unsafe, contact your local emergency number or helpline immediately.",
-    hi: "यदि आप असुरक्षित महसूस करें, तो तुरंत स्थानीय आपातकालीन नंबर पर संपर्क करें।",
-    kn: "ನೀವು ಅಸುರಕ್ಷಿತರೆಂದು ಅನಿಸಿದರೆ, ತಕ್ಷಣ ಸ್ಥಳೀಯ ತುರ್ತು ಸಂಖ್ಯೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ.",
-  },
-  start: { en: "Start", hi: "शुरू करें", kn: "ಪ್ರಾರಂಭಿಸಿ" },
-  results: { en: "Results", hi: "परिणाम", kn: "ಫಲಿತಾಂಶ" },
-  practiceNote: {
-    en: "Practice task - compared only with your own baseline. Not a diagnosis.",
-    hi: "अभ्यास कार्य - केवल आपकी बेसलाइन से तुलना। निदान नहीं।",
-    kn: "ಅಭ್ಯಾಸ ಕಾರ್ಯ - ನಿಮ್ಮ ಬೇಸ್‌ಲೈನ್‌ನೊಂದಿಗೆ ಮಾತ್ರ ಹೋಲಿಕೆ. ರೋಗನಿರ್ಣಯವಲ್ಲ.",
-  },
-} satisfies Record<string, Record<Lang, string>>;
+  home: L("Home", { hi: "होम", kn: "ಮನೆ", ar: "الرئيسية", fr: "Accueil", de: "Start", es: "Inicio", ta: "முகப்பு", te: "హోమ్", ml: "ഹോം", ur: "ہوم", bn: "হোম", mr: "मुख्यपृष्ठ", pa: "ਘਰ", gu: "હોમ", pt: "Início", it: "Home", nl: "Home", tr: "Ana Sayfa", sw: "Nyumbani" }),
+  baseline: L("Baseline", { hi: "बेसलाइन", kn: "ಬೇಸ್‌ಲೈನ್", ar: "خط الأساس", fr: "Référence", de: "Basislinie", es: "Base", ta: "அடிப்படை", te: "బేస్‌లైన్", ml: "ബേസ്‌ലൈൻ", ur: "بیس لائن", bn: "বেসলাইন", mr: "बेसलाइन", pa: "ਬੇਸਲਾਈਨ", gu: "બેઝલાઇન", pt: "Base", it: "Base", nl: "Basis", tr: "Temel", sw: "Msingi" }),
+  train: L("Train", { hi: "अभ्यास", kn: "ಅಭ್ಯಾಸ", ar: "تدريب", fr: "Entraînement", de: "Training", es: "Entrenar", ta: "பயிற்சி", te: "శిక్షణ", ml: "പരിശീലനം", ur: "مشق", bn: "অনুশীলন", mr: "सराव", pa: "ਅਭਿਆਸ", gu: "પ્રેક્ટિસ", pt: "Treinar", it: "Allenamento", nl: "Trainen", tr: "Antrenman", sw: "Mazoezi" }),
+  outcomes: L("Outcomes", { hi: "परिणाम", kn: "ಫಲಿತಾಂಶ", ar: "النتائج", fr: "Résultats", de: "Ergebnisse", es: "Resultados", ta: "முடிவுகள்", te: "ఫలితాలు", ml: "ഫലങ്ങൾ", ur: "نتائج", bn: "ফলাফল", mr: "निष्कर्ष", pa: "ਨਤੀਜੇ", gu: "પરિણામો", pt: "Resultados", it: "Risultati", nl: "Resultaten", tr: "Sonuçlar", sw: "Matokeo" }),
+  dashboard: L("Dashboard", { hi: "डैशबोर्ड", kn: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", ar: "لوحة المتابعة", fr: "Tableau de bord", de: "Übersicht", es: "Panel", ta: "டாஷ்போர்டு", te: "డాష్‌బోర్డ్", ml: "ഡാഷ്ബോർഡ്", ur: "ڈیش بورڈ", bn: "ড্যাশবোর্ড", mr: "डॅशबोर्ड", pa: "ਡੈਸ਼ਬੋਰਡ", gu: "ડેશબોર્ડ", pt: "Painel", it: "Cruscotto", nl: "Dashboard", tr: "Panel", sw: "Dashibodi" }),
+  report: L("Report", { hi: "रिपोर्ट", kn: "ವರದಿ", ar: "تقرير", fr: "Rapport", de: "Bericht", es: "Informe", ta: "அறிக்கை", te: "నివేదిక", ml: "റിപ്പോർട്ട്", ur: "رپورٹ", bn: "রিপোর্ট", mr: "अहवाल", pa: "ਰਿਪੋਰਟ", gu: "રિપોર્ટ", pt: "Relatório", it: "Report", nl: "Rapport", tr: "Rapor", sw: "Ripoti" }),
+  care: L("Care", { hi: "देखभाल", kn: "ಆರೈಕೆ", ar: "رعاية", fr: "Soutien", de: "Hilfe", es: "Apoyo", ta: "பராமரிப்பு", te: "సంరక్షణ", ml: "പരിചരണം", ur: "دیکھ بھال", bn: "যত্ন", mr: "काळजी", pa: "ਦੇਖਭਾਲ", gu: "સંભાળ", pt: "Apoio", it: "Supporto", nl: "Zorg", tr: "Destek", sw: "Huduma" }),
+  settings: L("Settings", { hi: "सेटिंग्स", kn: "ಸೆಟ್ಟಿಂಗ್‌ಗಳು", ar: "الإعدادات", fr: "Paramètres", de: "Einstellungen", es: "Ajustes", ta: "அமைப்புகள்", te: "సెట్టింగ్‌లు", ml: "ക്രമീകരണം", ur: "ترتیبات", bn: "সেটিংস", mr: "सेटिंग्ज", pa: "ਸੈਟਿੰਗਾਂ", gu: "સેટિંગ્સ", pt: "Ajustes", it: "Impostazioni", nl: "Instellingen", tr: "Ayarlar", sw: "Mipangilio" }),
+  stats: L("Stats", { hi: "आँकड़े", kn: "ಅಂಕಿಅಂಶ", ar: "إحصاءات", fr: "Stats", de: "Statistik", es: "Datos", ta: "புள்ளிகள்", te: "గణాంకాలు", ml: "സ്ഥിതിവിവരം", ur: "اعداد", bn: "পরিসংখ্যান", mr: "आकडेवारी", pa: "ਅੰਕੜੇ", gu: "આંકડા", pt: "Dados", it: "Statistiche", nl: "Stats", tr: "Veriler", sw: "Takwimu" }),
+  hero: L("Know your focus, from your own data.", { hi: "अपने डेटा से अपना फोकस जानें।", kn: "ನಿಮ್ಮ ಡೇಟಾದಿಂದ ನಿಮ್ಮ ಗಮನವನ್ನು ತಿಳಿಯಿರಿ।", ar: "اعرف تركيزك من بياناتك الخاصة.", fr: "Connaissez votre concentration grâce à vos données.", de: "Kenne deinen Fokus aus deinen eigenen Daten.", es: "Conoce tu concentración con tus datos.", ta: "உங்கள் தரவிலிருந்து உங்கள் கவனத்தை அறியுங்கள்.", te: "మీ డేటా నుండి మీ దృష్టిని తెలుసుకోండి.", ml: "നിങ്ങളുടെ ഡാറ്റയിൽ നിന്ന് നിങ്ങളുടെ ശ്രദ്ധ അറിയൂ.", ur: "اپنے ڈیٹا سے اپنی توجہ جانیں۔", bn: "আপনার ডেটা থেকে মনোযোগ জানুন।", mr: "तुमच्या डेटावरून फोकस जाणून घ्या.", pa: "ਆਪਣੇ ਡੇਟਾ ਤੋਂ ਧਿਆਨ ਜਾਣੋ।", gu: "તમારા ડેટાથી ધ્યાન જાણો.", pt: "Conheça seu foco pelos seus dados.", it: "Conosci la tua concentrazione dai tuoi dati.", nl: "Ken je focus uit je eigen data.", tr: "Odağını kendi verinden öğren.", sw: "Jua umakini wako kutokana na data yako." }),
+  heroSub: L("Short tasks build a personal baseline. MindLoop compares you only with your usual pattern - alongside sleep and activity context.", { hi: "छोटे कार्य आपकी बेसलाइन बनाते हैं।", kn: "ಸಣ್ಣ ಕಾರ್ಯಗಳು ಬೇಸ್‌ಲೈನ್ ನಿರ್ಮಿಸುತ್ತವೆ.", ar: "مهام قصيرة تبني خط الأساس الخاص بك.", fr: "De courtes tâches créent votre référence.", de: "Kurze Aufgaben bauen deine Basislinie auf.", es: "Tareas cortas crean tu base personal.", ta: "சிறு பணிகள் உங்கள் அடிப்படையை உருவாக்கும்.", te: "చిన్న పనులు మీ బేస్‌లైన్‌ను నిర్మిస్తాయి.", ml: "ചെറിയ ടാസ്ക്കുകൾ നിങ്ങളുടെ ബേസ്‌ലൈൻ ഉണ്ടാക്കുന്നു.", ur: "مختصر کام آپ کی بیس لائن بناتے ہیں۔", bn: "ছোট কাজ আপনার বেসলাইন তৈরি করে।", mr: "लहान कार्ये तुमची बेसलाइन तयार करतात.", pa: "ਛੋਟੇ ਕੰਮ ਤੁਹਾਡੀ ਬੇਸਲਾਈਨ ਬਣਾਉਂਦੇ ਹਨ।", gu: "નાના કાર્યો તમારી બેઝલાઇન બનાવે છે.", pt: "Tarefas curtas criam sua base.", it: "Brevi attività creano la tua base.", nl: "Korte taken bouwen je basis op.", tr: "Kısa görevler temelini oluşturur.", sw: "Kazi fupi hujenga msingi wako." }),
+  seeBaseline: L("See your baseline", { hi: "बेसलाइन देखें", kn: "ಬೇಸ್‌ಲೈನ್ ನೋಡಿ", ar: "عرض خط الأساس", fr: "Voir ma référence", de: "Basislinie ansehen", es: "Ver mi base", ta: "அடிப்படையைக் காண்க", te: "బేస్‌లైన్ చూడండి", ml: "ബേസ്‌ലൈൻ കാണൂ", ur: "بیس لائن دیکھیں", bn: "বেসলাইন দেখুন", mr: "बेसलाइन पहा", pa: "ਬੇਸਲਾਈਨ ਵੇਖੋ", gu: "બેઝલાઇન જુઓ", pt: "Ver minha base", it: "Vedi la base", nl: "Bekijk basis", tr: "Temeli gör", sw: "Ona msingi" }),
+  browseTasks: L("Browse tasks", { hi: "कार्य देखें", kn: "ಕಾರ್ಯಗಳನ್ನು ನೋಡಿ", ar: "تصفح المهام", fr: "Voir les tâches", de: "Aufgaben ansehen", es: "Ver tareas", ta: "பணிகளைக் காண்க", te: "పనులు చూడండి", ml: "ടാസ്ക്കുകൾ കാണൂ", ur: "کام دیکھیں", bn: "কাজ দেখুন", mr: "कार्ये पहा", pa: "ਕੰਮ ਵੇਖੋ", gu: "કાર્યો જુઓ", pt: "Ver tarefas", it: "Sfoglia attività", nl: "Taken bekijken", tr: "Görevlere göz at", sw: "Vinjari kazi" }),
+  notDiagnosis: L("Descriptive self-tracking only - not a diagnosis.", { hi: "केवल स्व-ट्रैकिंग - यह निदान नहीं है।", kn: "ವಿವರಣಾತ್ಮಕ ಸ್ವ-ಟ್ರ್ಯಾಕಿಂಗ್ ಮಾತ್ರ - ರೋಗನಿರ್ಣಯವಲ್ಲ.", ar: "تتبع ذاتي وصفي فقط - ليس تشخيصا.", fr: "Suivi descriptif uniquement - pas un diagnostic.", de: "Nur beschreibendes Selbst-Tracking - keine Diagnose.", es: "Solo autoseguimiento descriptivo - no es un diagnóstico.", ta: "விளக்க சுய கண்காணிப்பு மட்டும் - நோயறிதல் அல்ல.", te: "వివరణాత్మక స్వీయ-ట్రాకింగ్ మాత్రమే - నిర్ధారణ కాదు.", ml: "വിവരണാത്മക സ്വയം നിരീക്ഷണം മാത്രം - രോഗനിർണയമല്ല.", ur: "صرف وضاحتی خود نگرانی - تشخیص نہیں۔", bn: "শুধু বর্ণনামূলক স্ব-ট্র্যাকিং - রোগ নির্ণয় নয়।", mr: "केवळ वर्णनात्मक स्व-ट्रॅकिंग - निदान नाही.", pa: "ਸਿਰਫ਼ ਵਰਣਨਾਤਮਕ ਸਵੈ-ਟਰੈਕਿੰਗ - ਨਿਦਾਨ ਨਹੀਂ।", gu: "ફક્ત વર્ણનાત્મક સ્વ-ટ્રેકિંગ - નિદાન નથી.", pt: "Apenas autoacompanhamento descritivo - não é diagnóstico.", it: "Solo auto-monitoraggio descrittivo - non è una diagnosi.", nl: "Alleen beschrijvende zelftracking - geen diagnose.", tr: "Yalnızca betimleyici öz takip - tanı değil.", sw: "Ufuatiliaji wa kujieleza tu - si utambuzi." }),
+  crisis: L("If you ever feel unsafe, contact your local emergency number or helpline immediately.", { hi: "यदि आप असुरक्षित महसूस करें, तो तुरंत स्थानीय आपातकालीन नंबर पर संपर्क करें।", kn: "ನೀವು ಅಸುರಕ್ಷಿತರೆಂದು ಅನಿಸಿದರೆ, ತಕ್ಷಣ ಸ್ಥಳೀಯ ತುರ್ತು ಸಂಖ್ಯೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ.", ar: "إذا شعرت بعدم الأمان، اتصل برقم الطوارئ المحلي فورا.", fr: "En cas de danger, appelez immédiatement les urgences locales.", de: "Bei Gefahr sofort die lokale Notrufnummer anrufen.", es: "Si te sientes en peligro, llama a emergencias de inmediato.", ta: "பாதுகாப்பற்றதாக உணர்ந்தால் உடனே அவசர எண்ணை அழைக்கவும்.", te: "అసురక్షితంగా అనిపిస్తే వెంటనే స్థానిక అత్యవసర నంబర్‌కు కాల్ చేయండి.", ml: "സുരക്ഷിതമല്ലെന്ന് തോന്നിയാൽ ഉടൻ പ്രാദേശിക അടിയന്തര നമ്പറിൽ വിളിക്കൂ.", ur: "غیر محفوظ محسوس کریں تو فوری مقامی ایمرجنسی نمبر پر رابطہ کریں۔", bn: "অনিরাপদ বোধ করলে तुरंत স্থানীয় জরুরি নম্বরে কল করুন।", mr: "असुरक्षित वाटल्यास तात्काळ स्थानिक आपत्कालीन क्रमांकावर संपर्क करा.", pa: "ਅਸੁਰੱਖਿਅਤ ਮਹਿਸੂਸ ਹੋਵੇ ਤਾਂ ਤੁਰੰਤ ਸਥਾਨਕ ਐਮਰਜੈਂਸੀ ਨੰਬਰ ਤੇ ਸੰਪਰਕ ਕਰੋ।", gu: "અસુરક્ષિત લાગે તો તરત સ્થાનિક ઇમરજન્સી નંબર પર સંપર્ક કરો.", pt: "Se se sentir inseguro, ligue para a emergência local.", it: "Se non ti senti al sicuro, chiama subito i soccorsi.", nl: "Bel bij onveiligheid direct het lokale alarmnummer.", tr: "Güvende hissetmezsen hemen yerel acil numarayı ara.", sw: "Ukijihisi salama, piga nambari ya dharura mara moja." }),
+  start: L("Start", { hi: "शुरू करें", kn: "ಪ್ರಾರಂಭಿಸಿ", ar: "ابدأ", fr: "Commencer", de: "Start", es: "Empezar", ta: "தொடங்கு", te: "ప్రారంభించు", ml: "തുടങ്ങൂ", ur: "شروع کریں", bn: "শুরু", mr: "सुरू करा", pa: "ਸ਼ੁਰੂ ਕਰੋ", gu: "શરૂ કરો", pt: "Começar", it: "Inizia", nl: "Start", tr: "Başla", sw: "Anza" }),
+  results: L("Results", { hi: "परिणाम", kn: "ಫಲಿತಾಂಶ", ar: "النتائج", fr: "Résultats", de: "Ergebnisse", es: "Resultados", ta: "முடிவுகள்", te: "ఫలితాలు", ml: "ഫലങ്ങൾ", ur: "نتائج", bn: "ফলাফল", mr: "निकाल", pa: "ਨਤੀਜੇ", gu: "પરિણામો", pt: "Resultados", it: "Risultati", nl: "Resultaten", tr: "Sonuçlar", sw: "Matokeo" }),
+  practiceNote: L("Practice task - compared only with your own baseline. Not a diagnosis.", { hi: "अभ्यास कार्य - केवल आपकी बेसलाइन से तुलना। निदान नहीं।", kn: "ಅಭ್ಯಾಸ ಕಾರ್ಯ - ನಿಮ್ಮ ಬೇಸ್‌ಲೈನ್‌ನೊಂದಿಗೆ ಮಾತ್ರ ಹೋಲಿಕೆ. ರೋಗನಿರ್ಣಯವಲ್ಲ.", ar: "مهمة تدريبية - تقارن بخط الأساس الخاص بك فقط. ليست تشخيصا.", fr: "Exercice comparé à votre seule référence. Pas un diagnostic.", de: "Übung - nur mit deiner Basislinie verglichen. Keine Diagnose.", es: "Práctica comparada solo con tu base. No es diagnóstico.", ta: "பயிற்சி - உங்கள் அடிப்படையுடன் மட்டும் ஒப்பீடு. நோயறிதல் அல்ல.", te: "సాధన - మీ బేస్‌లైన్‌తో మాత్రమే పోలిక. నిర్ధారణ కాదు.", ml: "പരിശീലനം - നിങ്ങളുടെ ബേസ്‌ലൈനുമായി മാത്രം താരതമ്യം. രോഗനിർണയമല്ല.", ur: "مشقی کام - صرف آپ کی بیس لائن سے موازنہ۔ تشخیص نہیں۔", bn: "অনুশীলন - শুধু আপনার বেসলাইনের সাথে তুলনা। নির্ণয় নয়।", mr: "सराव - फक्त तुमच्या बेसलाइनशी तुलना. निदान नाही.", pa: "ਅਭਿਆਸ - ਸਿਰਫ਼ ਤੁਹਾਡੀ ਬੇਸਲਾਈਨ ਨਾਲ ਤੁਲਨਾ। ਨਿਦਾਨ ਨਹੀਂ।", gu: "પ્રેક્ટિસ - ફક્ત તમારી બેઝલાઇન સાથે સરખામણી. નિદાન નથી.", pt: "Prática comparada só com sua base. Não é diagnóstico.", it: "Esercizio confrontato solo con la tua base. Non è una diagnosi.", nl: "Oefening - alleen met je eigen basis vergeleken. Geen diagnose.", tr: "Alıştırma - yalnızca kendi temelinle karşılaştırılır. Tanı değil.", sw: "Zoezi - linalinganishwa na msingi wako tu. Si utambuzi." }),
+} satisfies Record<string, Dict>;
 export type Key = keyof typeof S;
 
 const Ctx = createContext<{ lang: Lang; setLang: (l: Lang) => void; t: (k: Key) => string }>({ lang: "en", setLang: () => {}, t: (k) => S[k].en });
@@ -57,6 +49,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   }, []);
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = RTL.includes(lang) ? "rtl" : "ltr";
     localStorage.setItem("ml-lang", lang);
   }, [lang]);
   return <Ctx.Provider value={{ lang, setLang: setLangState, t: (k) => S[k][lang] }}>{children}</Ctx.Provider>;

@@ -10,8 +10,8 @@ export function Stage({ family, title, sub, progress, children, onTap }: {
   family: string; title: string; sub: string; progress: number; children: React.ReactNode; onTap?: () => void;
 }) {
   const bg: Record<string, string> = {
-    focus: "bg-[#f4f7f4]", signal: "bg-[#faf6ef]", memory: "bg-[#f3f4fa]",
-    speed: "bg-[#faf3f3]", calm: "bg-[#f2f7f7]", habit: "bg-[#f7f5f1]", body: "bg-[#f5f6f4]",
+    focus: "bg-[#eef3e8]", signal: "bg-[#f7ecdc]", memory: "bg-[#e8ecf5]",
+    speed: "bg-[#f7e6e2]", calm: "bg-[#e2efec]", habit: "bg-[#f1ecdd]", body: "bg-[#edf1e4]",
   };
   const dot: Record<string, string> = {
     focus: "bg-emerald-500", signal: "bg-amber-500", memory: "bg-indigo-500",
@@ -19,13 +19,13 @@ export function Stage({ family, title, sub, progress, children, onTap }: {
   };
   return (
     <main onClick={onTap} className={`min-h-[70vh] transition-colors duration-500 ${bg[family] ?? "bg-[#fafafa]"}`}>
-      <div className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col items-center justify-center gap-5 px-5 py-8">
+      <div className="mx-auto flex w-full max-w-[1400px] min-h-[70vh] w-full max-w-md flex-col items-center justify-center gap-5 px-5 py-8">
         <div className="w-full">
-          <div className="mb-1 flex items-center justify-between text-[11px] font-medium uppercase tracking-widest text-neutral-400">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-medium uppercase tracking-widest text-[#a39c8c]">
             <span className="flex items-center gap-1.5"><span className={`inline-block h-2 w-2 rounded-full ${dot[family] ?? "bg-neutral-400"}`} />{title}</span>
             <span>{sub}</span>
           </div>
-          <div className="h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full bg-neutral-900 transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }} /></div>
+          <div className="h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full bg-[#b3541e] transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }} /></div>
         </div>
         {children}
       </div>
@@ -67,7 +67,7 @@ export function ChoiceGame({ taskKey, title, intro, total = 24, options, gen }: 
     <Stage family="focus" title={title} sub={`${idx + 1} / ${total}`} progress={idx / total}>
       <div className="card flex min-h-44 w-full items-center justify-center p-8 text-center shadow-sm">{stim?.show}</div>
       <div className="grid w-full grid-cols-2 gap-2">{options.map((o) => <button key={o} onClick={(e) => { e.stopPropagation(); pick(o); }} className="btn-ghost bg-white">{o}</button>)}</div>
-      <p className="text-[11px] text-neutral-400">keys 1-{options.length} · ← → work</p>
+      <p className="text-[11px] text-[#a39c8c]">keys 1-{options.length} · ← → work</p>
     </Stage>
   );
 }
@@ -96,7 +96,7 @@ export function SartGame({ taskKey = "sart", total = 40 }: { taskKey?: string; t
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.code === "Space") { e.preventDefault(); tap(); } }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); });
   if (phase === "intro") return <Intro title="Steady Response" body="Digits flash fast. TAP every digit EXCEPT 3 — withhold for 3. Tests sustained attention and mind-wandering." onStart={() => { trials.current = []; setPhase("run"); next(0); }} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
-  return <Stage family="signal" title="Steady Response" sub={`${idx + 1} / ${total} · skip 3`} progress={idx / total} onTap={tap}><div className="flex h-52 w-52 items-center justify-center rounded-[2rem] bg-white text-8xl font-semibold tabular-nums shadow-sm ring-1 ring-black/5">{digit}</div><p className="text-[11px] text-neutral-400">tap anywhere except on 3</p></Stage>;
+  return <Stage family="signal" title="Steady Response" sub={`${idx + 1} / ${total} · skip 3`} progress={idx / total} onTap={tap}><div className="flex h-52 w-52 items-center justify-center rounded-[2rem] bg-white text-8xl font-semibold tabular-nums shadow-sm ring-1 ring-black/5">{digit}</div><p className="text-[11px] text-[#a39c8c]">tap anywhere except on 3</p></Stage>;
 }
 
 /* ---------- Stop-signal: GO, but stop if it turns red ---------- */
@@ -125,7 +125,7 @@ export function StopSignalGame({ taskKey = "stopsignal", total = 30 }: { taskKey
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.code === "Space") { e.preventDefault(); tap(); } }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); });
   if (phase === "intro") return <Intro title="Stop Signal" body="TAP on green GO. If it turns RED, STOP yourself — don't tap. Tests reactive inhibition." onStart={() => { trials.current = []; setPhase("run"); next(0); }} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
-  return <Stage family="signal" title="Stop Signal" sub={`${idx + 1} / ${total}`} progress={idx / total} onTap={tap}><div className={`flex h-44 w-44 items-center justify-center rounded-full text-2xl font-bold text-white shadow-lg transition-colors ${stop ? "bg-rose-500" : "bg-emerald-500"}`}>{stop ? "STOP" : "GO"}</div><p className="text-[11px] text-neutral-400">green = tap · red = freeze</p></Stage>;
+  return <Stage family="signal" title="Stop Signal" sub={`${idx + 1} / ${total}`} progress={idx / total} onTap={tap}><div className={`flex h-44 w-44 items-center justify-center rounded-full text-2xl font-bold text-white shadow-lg transition-colors ${stop ? "bg-rose-500" : "bg-emerald-500"}`}>{stop ? "STOP" : "GO"}</div><p className="text-[11px] text-[#a39c8c]">green = tap · red = freeze</p></Stage>;
 }
 
 /* ---------- N-back: tap if letter matches 2 back ---------- */
@@ -157,7 +157,7 @@ export function NBackGame({ taskKey = "nback", n = 2, total = 30 }: { taskKey?: 
   useEffect(() => { const h = (e: KeyboardEvent) => { if (e.code === "Space") { e.preventDefault(); tap(); } }; window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h); });
   if (phase === "intro") return <Intro title={`N-Back ${n}`} body={`Letters appear one by one. TAP only when the letter matches the one ${n} steps back. Tests working-memory updating.`} onStart={() => { seq.current = []; trials.current = []; setPhase("run"); next(0); }} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
-  return <Stage family="memory" title={`N-Back ${n}`} sub={`${idx + 1} / ${total}`} progress={idx / total} onTap={tap}><div className="flex gap-2">{seq.current.slice(-3).map((c, i) => <div key={i} className={`flex h-20 w-20 items-center justify-center rounded-2xl text-4xl font-semibold ${i === 2 ? "bg-neutral-900 text-white shadow" : "bg-white text-neutral-300 ring-1 ring-black/5"}`}>{c}</div>)}</div><p className="text-[11px] text-neutral-400">tap MATCH only if letter = {n} back</p><button className="btn-primary">MATCH</button></Stage>;
+  return <Stage family="memory" title={`N-Back ${n}`} sub={`${idx + 1} / ${total}`} progress={idx / total} onTap={tap}><div className="flex gap-2">{seq.current.slice(-3).map((c, i) => <div key={i} className={`flex h-20 w-20 items-center justify-center rounded-2xl text-4xl font-semibold ${i === 2 ? "bg-[#b3541e] text-white shadow" : "bg-white text-[#a39c8c] ring-1 ring-black/5"}`}>{c}</div>)}</div><p className="text-[11px] text-[#a39c8c]">tap MATCH only if letter = {n} back</p><button className="btn-primary">MATCH</button></Stage>;
 }
 
 /* ---------- Digit span: watch, then type back ---------- */
@@ -179,11 +179,11 @@ export function DigitSpanGame({ taskKey = "span" }: { taskKey?: string }) {
   };
   if (phase === "intro") return <Intro title="Digit Span" body="Watch the digits, then type them back in order. Span grows until you miss. Tests short-term memory." onStart={() => { trials.current = []; setLen(3); startRound(3); }} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
-  if (phase === "show") return <Stage family="memory" title="Digit Span" sub={`length ${len}`} progress={showIdx / digits.length}><div className="flex gap-2">{digits.slice(0, showIdx).map((d, i) => <div key={i} className="flex h-16 w-16 items-center justify-center rounded-2xl bg-neutral-900 text-3xl font-semibold text-white shadow">{d}</div>)}</div><p className="text-[11px] text-neutral-400">memorize…</p></Stage>;
+  if (phase === "show") return <Stage family="memory" title="Digit Span" sub={`length ${len}`} progress={showIdx / digits.length}><div className="flex gap-2">{digits.slice(0, showIdx).map((d, i) => <div key={i} className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#b3541e] text-3xl font-semibold text-white shadow">{d}</div>)}</div><p className="text-[11px] text-[#a39c8c]">memorize…</p></Stage>;
   return (
     <Stage family="memory" title="Digit Span" sub={`recall ${len}`} progress={1}>
-      <div className="flex gap-2">{Array.from({ length: len }, (_, i) => <div key={i} className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-semibold ${entry[i] ? "bg-neutral-900 text-white" : "bg-white text-neutral-300 ring-1 ring-black/10"}`}>{entry[i] ?? "·"}</div>)}</div>
-      <input value={entry} onChange={(e) => setEntry(e.target.value.replace(/\D/g, ""))} inputMode="numeric" aria-label="digits" className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-center text-2xl tracking-[0.3em] outline-none focus:border-neutral-900" autoFocus />
+      <div className="flex gap-2">{Array.from({ length: len }, (_, i) => <div key={i} className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-semibold ${entry[i] ? "bg-[#b3541e] text-white" : "bg-white text-[#a39c8c] ring-1 ring-black/10"}`}>{entry[i] ?? "·"}</div>)}</div>
+      <input value={entry} onChange={(e) => setEntry(e.target.value.replace(/\D/g, ""))} inputMode="numeric" aria-label="digits" className="w-full rounded-2xl border border-[#e5ddcc] bg-white px-4 py-3 text-center text-2xl tracking-[0.3em] outline-none focus:border-[#b3541e]" autoFocus />
       <button onClick={submit} className="btn-primary w-full">Submit</button>
     </Stage>
   );
@@ -218,9 +218,9 @@ export function SimonGame({ taskKey = "sequence" }: { taskKey?: string }) {
   return (
     <Stage family="memory" title="Sequence Echo" sub={phase === "show" ? "watch…" : `${pos + 1}/${seq.length}`} progress={pos / Math.max(seq.length, 1)}>
       <div className="grid w-full grid-cols-2 gap-3">
-        {COLORS.map((c, i) => <button key={i} onClick={() => press(i)} aria-label={`pad ${i + 1}`} className={`h-28 rounded-[1.5rem] shadow-sm transition-all duration-150 ${c} ${lit === i ? "scale-95 brightness-125 ring-4 ring-neutral-900/20" : "opacity-80"}`} />)}
+        {COLORS.map((c, i) => <button key={i} onClick={() => press(i)} aria-label={`pad ${i + 1}`} className={`h-28 rounded-[1.5rem] shadow-sm transition-all duration-150 ${c} ${lit === i ? "scale-95 brightness-125 ring-4 ring-[#b3541e]/20" : "opacity-80"}`} />)}
       </div>
-      <p className="text-[11px] text-neutral-400">{phase === "show" ? "memorize the order" : "repeat it back"}</p>
+      <p className="text-[11px] text-[#a39c8c]">{phase === "show" ? "memorize the order" : "repeat it back"}</p>
     </Stage>
   );
 }
@@ -256,7 +256,7 @@ export function PairsGame({ taskKey = "pairs" }: { taskKey?: string }) {
     <Stage family="memory" title="Pair Match" sub={`${found.length / 2}/6 · ${moves} moves`} progress={found.length / deck.length}>
       <div className="grid w-full grid-cols-4 gap-2">
         {deck.map((c, i) => (
-          <button key={i} onClick={() => flip(i)} aria-label={`card ${i + 1}`} className={`flex aspect-square items-center justify-center rounded-2xl text-3xl transition-all duration-200 ${open.includes(i) || found.includes(i) ? "rotate-0 bg-white shadow-sm ring-1 ring-neutral-900" : "bg-indigo-100 ring-1 ring-indigo-200 hover:bg-indigo-200"}`}>
+          <button key={i} onClick={() => flip(i)} aria-label={`card ${i + 1}`} className={`flex aspect-square items-center justify-center rounded-2xl text-3xl transition-all duration-200 ${open.includes(i) || found.includes(i) ? "rotate-0 bg-white shadow-sm ring-1 ring-[#b3541e]" : "bg-indigo-100 ring-1 ring-indigo-200 hover:bg-indigo-200"}`}>
             {open.includes(i) || found.includes(i) ? c : <span className="text-indigo-300">?</span>}
           </button>
         ))}
@@ -320,7 +320,7 @@ export function SearchGame({ taskKey, title, intro, total = 20, kind = "search" 
   return (
     <Stage family="focus" title={title} sub={`${idx + 1} / ${total}`} progress={idx / total}>
       <div className="grid w-full grid-cols-4 gap-2">{cells.map((c, i) => <button key={i} onClick={() => tap(i)} aria-label={`option ${i + 1}`} className="flex h-16 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm ring-1 ring-black/5 transition active:scale-90 active:bg-emerald-50">{c}</button>)}</div>
-      <p className="text-[11px] text-neutral-400">scan fast · tap the odd one</p>
+      <p className="text-[11px] text-[#a39c8c]">scan fast · tap the odd one</p>
     </Stage>
   );
 }
@@ -347,7 +347,7 @@ export function TrailGame({ taskKey = "trail" }: { taskKey?: string }) {
   if (phase === "done") return <Done saved={saved} offline={offline} />;
   return (
     <Stage family="speed" title="Trail Connect" sub={`${pos}/${SEQ.length}`} progress={pos / SEQ.length}>
-      <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-black/5">Next <b className="text-lg">{SEQ[pos]}</b><span className="text-neutral-300">→</span><span className="text-neutral-400">{SEQ.slice(pos + 1, pos + 3).join(" · ")}</span></div>
+      <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm shadow-sm ring-1 ring-black/5">Next <b className="text-lg">{SEQ[pos]}</b><span className="text-[#a39c8c]">→</span><span className="text-[#a39c8c]">{SEQ.slice(pos + 1, pos + 3).join(" · ")}</span></div>
       <div className="grid w-full grid-cols-4 gap-2">
         {order.map((li) => (
           <button key={li} onClick={() => tap(li)} disabled={SEQ.slice(0, pos).includes(SEQ[li])} className="flex h-16 items-center justify-center rounded-2xl bg-white text-xl font-semibold shadow-sm ring-1 ring-black/5 transition active:scale-90 disabled:opacity-15">{SEQ[li]}</button>
@@ -378,10 +378,10 @@ export function PvtGame({ taskKey = "pvt", total = 12 }: { taskKey?: string; tot
   if (phase === "intro") return <Intro title="Vigilance Tap" body="Wait for the screen to turn green, then TAP as fast as you can. Don't tap early. Gold-standard vigilant-attention task (PVT)." onStart={() => { trials.current = []; round(0); }} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
   return (
-    <main onClick={tap} className={`flex min-h-[70vh] cursor-pointer flex-col items-center justify-center gap-4 transition-colors duration-300 ${phase === "cue" ? "bg-emerald-400" : "bg-[#faf3f3]"}`}>
-      <p className={`text-xs font-medium uppercase tracking-widest ${phase === "cue" ? "text-white" : "text-neutral-400"}`}>{idx + 1} / {total} · vigilance</p>
-      <div className={`flex h-48 w-48 items-center justify-center rounded-full text-3xl font-semibold tabular-nums shadow-lg ${phase === "cue" ? "bg-white text-neutral-900" : "bg-white/60 text-neutral-300 ring-1 ring-black/5"}`}>{phase === "cue" ? (rt ?? "TAP!") : "···"}</div>
-      <p className={`text-[11px] ${phase === "cue" ? "text-white" : "text-neutral-400"}`}>{phase === "cue" ? "tap now!" : "wait for the flash"}</p>
+    <main onClick={tap} className={`flex min-h-[70vh] cursor-pointer flex-col items-center justify-center gap-4 transition-colors duration-300 ${phase === "cue" ? "bg-emerald-400" : "bg-[#f7e6e2]"}`}>
+      <p className={`text-xs font-medium uppercase tracking-widest ${phase === "cue" ? "text-white" : "text-[#a39c8c]"}`}>{idx + 1} / {total} · vigilance</p>
+      <div className={`flex h-48 w-48 items-center justify-center rounded-full text-3xl font-semibold tabular-nums shadow-lg ${phase === "cue" ? "bg-white text-[#23201a]" : "bg-white/60 text-[#a39c8c] ring-1 ring-black/5"}`}>{phase === "cue" ? (rt ?? "TAP!") : "···"}</div>
+      <p className={`text-[11px] ${phase === "cue" ? "text-white" : "text-[#a39c8c]"}`}>{phase === "cue" ? "tap now!" : "wait for the flash"}</p>
     </main>
   );
 }
@@ -412,9 +412,9 @@ export function RhythmGame({ taskKey = "rhythm", total = 16 }: { taskKey?: strin
   if (phase === "done") return <Done saved={saved} offline={offline} />;
   return (
     <Stage family="speed" title="Rhythm Tap" sub={`${idx} / ${total}`} progress={idx / total} onTap={tap}>
-      <div className="flex w-full items-center justify-center gap-1">{Array.from({ length: 16 }, (_, i) => <div key={i} className={`h-10 w-2 rounded-full transition-all ${i === idx % 16 ? "bg-neutral-900" : "bg-black/10"}`} />)}</div>
-      <div className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg transition-all duration-150 ${beat ? "scale-110 bg-neutral-900" : "bg-neutral-300"}`}>♪</div>
-      <p className="text-[11px] text-neutral-400">tap exactly on the pulse</p>
+      <div className="flex w-full items-center justify-center gap-1">{Array.from({ length: 16 }, (_, i) => <div key={i} className={`h-10 w-2 rounded-full transition-all ${i === idx % 16 ? "bg-[#b3541e]" : "bg-black/10"}`} />)}</div>
+      <div className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg transition-all duration-150 ${beat ? "scale-110 bg-[#b3541e]" : "bg-neutral-300"}`}>♪</div>
+      <p className="text-[11px] text-[#a39c8c]">tap exactly on the pulse</p>
     </Stage>
   );
 }
@@ -449,9 +449,9 @@ export function TraceGame({ taskKey = "trace", dur = 20 }: { taskKey?: string; d
     <Stage family="body" title="Trace Path" sub={`${Math.round(n / 10)}s · err ${err.toFixed(1)}`} progress={n / 200}>
       <div className="relative h-72 w-full touch-none overflow-hidden rounded-[1.5rem] bg-white shadow-sm ring-1 ring-black/5" onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); ptr.current = { x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 }; }} onPointerDown={(e) => { const r = e.currentTarget.getBoundingClientRect(); ptr.current = { x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 }; }}>
         <div className="absolute h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime-500 shadow-lg" style={{ left: `${dot.x}%`, top: `${dot.y}%` }} />
-        <div className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-neutral-900 bg-white/70" style={{ left: `${ptr.current.x}%`, top: `${ptr.current.y}%` }} />
+        <div className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-[#b3541e] bg-white/70" style={{ left: `${ptr.current.x}%`, top: `${ptr.current.y}%` }} />
       </div>
-      <p className="text-[11px] text-neutral-400">keep your ring on the green dot</p>
+      <p className="text-[11px] text-[#a39c8c]">keep your ring on the green dot</p>
     </Stage>
   );
 }
@@ -474,7 +474,7 @@ export function BreatheGame({ taskKey = "breathe" }: { taskKey?: string }) {
   }, [phase, save]);
   if (phase === "intro") return <Intro title="Breath Pace" body="Follow the pacer: inhale 4s, hold 4s, exhale 6s × 3. Mindfulness-based attention practice (Mrazek 2013)." onStart={() => setPhase("run")} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
-  return <Stage family="calm" title="Breath Pace" sub={`cycle ${cycle + 1}/3`} progress={cycle / 3}><div className="relative flex h-56 w-56 items-center justify-center"><div className={`absolute inset-0 rounded-full bg-teal-100 transition-all duration-[4000ms] ${step === "inhale" ? "scale-100 opacity-100" : "scale-50 opacity-40"}`} /><div className={`relative flex h-32 w-32 items-center justify-center rounded-full bg-teal-700 text-sm font-medium uppercase tracking-widest text-white transition-all duration-[4000ms] ${step === "inhale" ? "scale-110" : step === "exhale" ? "scale-90" : "scale-100"}`}>{step}</div></div><p className="text-[11px] text-neutral-400">inhale 4s · hold 4s · exhale 6s</p></Stage>;
+  return <Stage family="calm" title="Breath Pace" sub={`cycle ${cycle + 1}/3`} progress={cycle / 3}><div className="relative flex h-56 w-56 items-center justify-center"><div className={`absolute inset-0 rounded-full bg-teal-100 transition-all duration-[4000ms] ${step === "inhale" ? "scale-100 opacity-100" : "scale-50 opacity-40"}`} /><div className={`relative flex h-32 w-32 items-center justify-center rounded-full bg-teal-700 text-sm font-medium uppercase tracking-widest text-white transition-all duration-[4000ms] ${step === "inhale" ? "scale-110" : step === "exhale" ? "scale-90" : "scale-100"}`}>{step}</div></div><p className="text-[11px] text-[#a39c8c]">inhale 4s · hold 4s · exhale 6s</p></Stage>;
 }
 
 export function ReadGame({ taskKey = "read" }: { taskKey?: string }) {
@@ -499,9 +499,9 @@ export function CheckinGame({ taskKey = "checkin" }: { taskKey?: string }) {
   const { saved, offline, save } = useSubmit(taskKey);
   if (phase === "done") return <Done saved={saved} offline={offline} />;
   return (
-    <main className="mx-auto max-w-md space-y-4 px-5 py-10">
+    <main className="mx-auto w-full max-w-[1400px] space-y-4 px-5 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Daily Check-in</h1>
-      <p className="text-xs text-neutral-400">Q1 behavior snapshot: mood, sleep, diet, activity. Self-report only.</p>
+      <p className="text-xs text-[#a39c8c]">Q1 behavior snapshot: mood, sleep, diet, activity. Self-report only.</p>
       {[["Focus today", focus, setFocus, 5], ["Mood", mood, setMood, 5], ["Sleep hours", sleep, setSleep, 12], ["Fruit & veg servings", veg, setVeg, 8], ["Active minutes", active, setActive, 120]].map(([l, v, set, max]: any) => (
         <label key={l as string} className="card block p-4"><span className="text-sm font-medium">{l}: {v}</span><input type="range" min={0} max={max} value={v} onChange={(e) => set(Number(e.target.value))} className="mt-2 w-full" /></label>
       ))}
@@ -540,7 +540,7 @@ export function DualGame({ taskKey = "dual", total = 24 }: { taskKey?: string; t
   useEffect(() => { const k = (e: KeyboardEvent) => { if (e.code === "Space") { e.preventDefault(); tap(); } }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); });
   if (phase === "intro") return <Intro title="Dual Track" body="TAP only when BOTH hold: RED circle AND EVEN number. Otherwise withhold. Tests divided attention." onStart={() => { trials.current = []; setPhase("run"); next(0); }} />;
   if (phase === "done") return <Done saved={saved} offline={offline} />;
-  return <Stage family="focus" title="Dual Track" sub={`${idx + 1} / ${total}`} progress={idx / total} onTap={tap}><div className="flex w-full gap-3"><div className={`flex h-28 flex-1 items-center justify-center rounded-2xl text-sm font-bold uppercase tracking-widest text-white ${stim.color === "red" ? "bg-rose-500" : "bg-sky-500"}`}>{stim.color}</div><div className="flex h-28 flex-1 items-center justify-center rounded-2xl bg-white text-5xl font-semibold tabular-nums shadow-sm ring-1 ring-black/5">{stim.num}</div></div><p className="text-[11px] text-neutral-400">tap only when RED + EVEN together</p></Stage>;
+  return <Stage family="focus" title="Dual Track" sub={`${idx + 1} / ${total}`} progress={idx / total} onTap={tap}><div className="flex w-full gap-3"><div className={`flex h-28 flex-1 items-center justify-center rounded-2xl text-sm font-bold uppercase tracking-widest text-white ${stim.color === "red" ? "bg-rose-500" : "bg-sky-500"}`}>{stim.color}</div><div className="flex h-28 flex-1 items-center justify-center rounded-2xl bg-white text-5xl font-semibold tabular-nums shadow-sm ring-1 ring-black/5">{stim.num}</div></div><p className="text-[11px] text-[#a39c8c]">tap only when RED + EVEN together</p></Stage>;
 }
 
 /* ---------- Switch: rule alternates odd/even ---------- */
