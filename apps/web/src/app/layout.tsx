@@ -3,6 +3,8 @@ import Link from "next/link";
 import "./globals.css";
 import { LangProvider, useLang, LANGS, LANG_LABEL, type Lang } from "@/lib/i18n";
 
+const NAV_COLORS = ["#ff4d6d", "#f97316", "#ffb020", "#22c55e", "#0ea5a4", "#3b82f6", "#c026d3"];
+
 function Shell({ children }: { children: React.ReactNode }) {
   const { lang, setLang, t } = useLang();
   const nav = [
@@ -20,42 +22,51 @@ function Shell({ children }: { children: React.ReactNode }) {
   ];
   return (
     <body className="min-h-screen antialiased">
-      <header className="sticky top-0 z-40 border-b border-[#e5ddcc] bg-[#f7f4ec]/90 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-[1400px] max-w-5xl items-center justify-between gap-2 px-5 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#b3541e] text-sm font-bold text-white">M</span>
-            <span className="text-[17px] font-semibold tracking-tight">MindLoop</span>
+      <div className="rainbow-bar" />
+      <header className="sticky top-0 z-40 border-b-2 border-[#f0e3cd] bg-[#fff8ef]/92 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-2 px-5 py-3">
+          <Link href="/" className="group flex items-center gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff4d6d] text-lg font-black text-white shadow-[0_4px_0_#e13a5a] transition group-hover:rotate-6">M</span>
+            <span className="text-xl font-black tracking-tight">Mind<span className="text-[#ff4d6d]">Loop</span></span>
           </Link>
-          <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Primary">
-            {nav.map((n) => (
-              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium text-[#5c564a] transition hover:bg-[#f1ecdd] hover:text-[#23201a]">
+          <nav className="hidden items-center gap-1 overflow-x-auto lg:flex" aria-label="Primary">
+            {nav.map((n, i) => (
+              <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-bold text-[#6b6257] transition hover:-translate-y-0.5 hover:text-white" style={{ background: "transparent" }} onMouseEnter={(e) => { e.currentTarget.style.background = NAV_COLORS[i % NAV_COLORS.length]; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}>
                 {n.label}
               </Link>
             ))}
           </nav>
-          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label="Language" className="rounded-full border border-[#e5ddcc] bg-white px-2.5 py-1.5 text-xs font-medium text-[#5c564a] outline-none">
+          <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label="Language" className="rounded-full border-2 border-[#f0e3cd] bg-white px-3 py-1.5 text-xs font-bold text-[#26221c] outline-none">
             {LANGS.map((l) => <option key={l} value={l}>{LANG_LABEL[l]}</option>)}
           </select>
         </div>
+        <nav className="flex items-center gap-1 overflow-x-auto px-4 pb-2 lg:hidden" aria-label="Primary mobile">
+          {nav.map((n, i) => (
+            <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-bold text-white" style={{ background: NAV_COLORS[i % NAV_COLORS.length] }}>
+              {n.label}
+            </Link>
+          ))}
+        </nav>
       </header>
-      <div className="pb-24">{children}</div>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e5ddcc] bg-[#fffdf7]/95 backdrop-blur-md sm:hidden" aria-label="Mobile">
+      <div className="anim-rise pb-24">{children}</div>
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-[#f0e3cd] bg-white/95 backdrop-blur-md sm:hidden" aria-label="Mobile">
         <div className="grid grid-cols-5 px-2 py-2">
           {[
-            { href: "/", label: t("home") },
-            { href: "/baseline", label: t("baseline") },
-            { href: "/games", label: t("train") },
-            { href: "/dashboard", label: t("stats") },
-            { href: "/settings", label: t("settings") },
+            { href: "/", label: t("home"), c: "#ff4d6d" },
+            { href: "/baseline", label: t("baseline"), c: "#0ea5a4" },
+            { href: "/games", label: t("train"), c: "#f97316" },
+            { href: "/dashboard", label: t("stats"), c: "#3b82f6" },
+            { href: "/settings", label: t("settings"), c: "#c026d3" },
           ].map((n) => (
-            <Link key={n.href} href={n.href} className="rounded-xl py-2 text-center text-[11px] font-medium text-[#5c564a] active:bg-[#f1ecdd]">
+            <Link key={n.href} href={n.href} className="rounded-xl py-2 text-center text-[11px] font-black" style={{ color: n.c }}>
+              <span className="mx-auto mb-0.5 block h-1.5 w-8 rounded-full" style={{ background: n.c }} />
               {n.label}
             </Link>
           ))}
         </div>
       </nav>
-      <footer className="border-t border-[#e5ddcc] py-6 text-center text-xs text-[#a39c8c]">
-        MindLoop · {t("notDiagnosis")}
+      <footer className="border-t-2 border-[#f0e3cd] bg-white py-6 text-center text-xs font-semibold text-[#b3a893]">
+        Made for curious minds · MindLoop · {t("notDiagnosis")}
       </footer>
     </body>
   );

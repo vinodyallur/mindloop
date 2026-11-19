@@ -10,22 +10,26 @@ export function Stage({ family, title, sub, progress, children, onTap }: {
   family: string; title: string; sub: string; progress: number; children: React.ReactNode; onTap?: () => void;
 }) {
   const bg: Record<string, string> = {
-    focus: "bg-[#eef3e8]", signal: "bg-[#f7ecdc]", memory: "bg-[#e8ecf5]",
-    speed: "bg-[#f7e6e2]", calm: "bg-[#e2efec]", habit: "bg-[#f1ecdd]", body: "bg-[#edf1e4]",
+    focus: "bg-[#d3f5df]", signal: "bg-[#ffedb8]", memory: "bg-[#d8e7ff]",
+    speed: "bg-[#ffd9e2]", calm: "bg-[#c9f2f1]", habit: "bg-[#f3e8c9]", body: "bg-[#e7f6c9]",
   };
   const dot: Record<string, string> = {
-    focus: "bg-emerald-500", signal: "bg-amber-500", memory: "bg-indigo-500",
-    speed: "bg-rose-500", calm: "bg-teal-500", habit: "bg-stone-500", body: "bg-lime-600",
+    focus: "bg-[#22c55e]", signal: "bg-[#f97316]", memory: "bg-[#3b82f6]",
+    speed: "bg-[#ff4d6d]", calm: "bg-[#0ea5a4]", habit: "bg-[#b45309]", body: "bg-[#84cc16]",
+  };
+  const bar: Record<string, string> = {
+    focus: "#22c55e", signal: "#f97316", memory: "#3b82f6",
+    speed: "#ff4d6d", calm: "#0ea5a4", habit: "#b45309", body: "#84cc16",
   };
   return (
-    <main onClick={onTap} className={`min-h-[70vh] transition-colors duration-500 ${bg[family] ?? "bg-[#fafafa]"}`}>
-      <div className="mx-auto flex w-full max-w-[1400px] min-h-[70vh] w-full max-w-md flex-col items-center justify-center gap-5 px-5 py-8">
-        <div className="w-full">
-          <div className="mb-1 flex items-center justify-between text-[11px] font-medium uppercase tracking-widest text-[#a39c8c]">
-            <span className="flex items-center gap-1.5"><span className={`inline-block h-2 w-2 rounded-full ${dot[family] ?? "bg-neutral-400"}`} />{title}</span>
+    <main onClick={onTap} className={`min-h-[70vh] transition-colors duration-500 ${bg[family] ?? "bg-[#fff8ef]"}`}>
+      <div className="mx-auto flex min-h-[70vh] w-full max-w-[1400px] flex-col items-center justify-center gap-5 px-5 py-8">
+        <div className="w-full rounded-full border-2 border-black/5 bg-white/80 px-4 py-2 backdrop-blur">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-black uppercase tracking-widest text-[#6b6257]">
+            <span className="flex items-center gap-1.5"><span className={`inline-block h-2.5 w-2.5 rounded-full ${dot[family] ?? "bg-[#ffb020]"}`} />{title}</span>
             <span>{sub}</span>
           </div>
-          <div className="h-1 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full bg-[#b3541e] transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }} /></div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-black/10"><div className="h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%`, background: bar[family] ?? "#ff4d6d" }} /></div>
         </div>
         {children}
       </div>
