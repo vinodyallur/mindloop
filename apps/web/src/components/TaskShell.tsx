@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { submitSession, type Trial } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
@@ -33,8 +33,18 @@ export function Intro({ title, body, onStart, cta }: { title: string; body: stri
   );
 }
 
-export function Done({ saved, offline }: { saved: any; offline: boolean }) {
+export function Done({ saved, offline, nextHref, nextLabel, onDone }: { saved: any; offline: boolean; nextHref?: string; nextLabel?: string; onDone?: () => void }) {
   const { t } = useLang();
+  const [flow, setFlow] = useState<{ next: string; step: string; total: string } | null>(null);
+  useEffect(() => {
+    onDone?.();
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const next = q.get("next"), step = q.get("step"), total = q.get("total");
+      if (next) setFlow({ next, step: step ?? "", total: total ?? "" });
+    } catch { /* no flow */ }
+  }, [onDone]);
+  const flowNext = nextHref ?? flow?.next;
   return (
     <main className="mx-auto w-full max-w-[1400px] space-y-4 px-5 py-10">
       <h1 className="text-3xl font-semibold tracking-tight">{t("results")}</h1>
@@ -44,8 +54,15 @@ export function Done({ saved, offline }: { saved: any; offline: boolean }) {
         <p className="card p-4 text-sm text-amber-700">Backend offline — start the API to save &amp; score this session.</p>
       ) : <p className="text-sm text-[#5c564a]">Saving…</p>}
       <p className="text-xs text-[#a39c8c]">Metrics are compared only with your own baseline. No composite score, no diagnosis.</p>
+      {flow && (
+        <p className="card p-4 text-sm font-bold text-[#14703a]" style={{ background: "#d3f5df", borderColor: "transparent" }}>
+          ✓ Step {flow.step} of {flow.total} saved to your baseline!
+        </p>
+      )}
       <div className="flex flex-wrap gap-3">
-        <Link href="/today" className="btn-primary">☀️ Back to today's tasks</Link>
+        {flowNext && <Link href={flowNext} className="btn-primary text-lg">{nextLabel ?? (flow && Number(flow.step) >= Number(flow.total) ? "🎉 See my baseline" : "Next →")}</Link>}
+        {flow && <Link href="/assessment" className="btn-ghost">Skip ⏭</Link>}
+        <Link href="/today" className="btn-ghost">☀️ Back to today's tasks</Link>
         <Link href="/baseline" className="btn-ghost">View baseline</Link>
         <Link href="/games" className="btn-ghost">More games</Link>
       </div>

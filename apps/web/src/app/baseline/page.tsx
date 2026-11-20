@@ -19,7 +19,11 @@ export default function Baseline() {
   const [metric, setMetric] = useState("");
   const [aset, setAset] = useState<any>(null);
   const [screen, setScreen] = useState<any[]>([]);
+  const [fresh, setFresh] = useState(false);
   useEffect(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get("fresh") === "1") setFresh(true);
+    } catch { /* no query */ }
     const q = `?task_key=${task}&metric_key=${metric}&window=30`;
     req(`/api/v1/baseline/index${q}`).then(setData);
     req("/api/v1/baseline/forecast").then((f) => f && setData((d: any) => (d ? { ...d, forecast: f } : d)));
@@ -37,6 +41,20 @@ export default function Baseline() {
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Your Index</h1>
         <p className="mt-1 max-w-xl text-sm text-[#5c564a]">0 = far below your usual pattern · 50 = at your baseline median · 100 = far above. Descriptive only — never a diagnosis.</p>
       </header>
+
+      {fresh && aset?.baseline_ready && (
+        <section className="card pop-in p-6 text-center sm:p-8" style={{ background: "#d3f5df", borderColor: "transparent" }}>
+          <p className="text-5xl">🎉</p>
+          <h2 className="mt-2 text-3xl font-black text-[#14703a]">Your baseline is ready!</h2>
+          <p className="mx-auto mt-1 max-w-xl text-sm font-medium text-[#14703a]">
+            All 4 games done — your starting line is drawn below. From here, every game moves your index.
+          </p>
+          <div className="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
+            <Link href="/report/story" className="btn-primary">📖 Generate my story report</Link>
+            <Link href="/today" className="btn-teal">☀️ Start today's plan</Link>
+          </div>
+        </section>
+      )}
 
       {aset && !aset.baseline_ready && (
         <section className="card border-l-4 p-5" style={{ borderLeftColor: "#ff4d6d" }}>

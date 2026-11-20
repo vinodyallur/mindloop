@@ -19,15 +19,42 @@ export default function Assessment() {
   const [done, setDone] = useState<string[]>([]);
   const [step, setStep] = useState(0);
 
-  useEffect(() => {
+  function refresh() {
     fetch(`${API}/api/v1/baseline/assessment-set`, { headers: { "x-api-key": KEY } })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && setDone(d.items.filter((t: any) => t.done).map((t: any) => t.task_key)))
       .catch(() => {});
+  }
+  useEffect(() => {
+    refresh();
+    // Re-check when returning from a game (progress saved while away)
+    const onFocus = () => refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
+  // Auto-advance past completed steps; when all 4 done, show the finale
+  useEffect(() => {
+    if (done.length >= FLOW.length) setStep(FLOW.length);
+    else {
+      const firstOpen = FLOW.findIndex((f) => !done.includes(f.key));
+      if (firstOpen >= 0) setStep((s) => (s >= FLOW.length || done.includes(FLOW[s].key) ? firstOpen : s));
+    }
+  }, [done]);
+
   const current = FLOW[Math.min(step, FLOW.length - 1)];
-  const finished = step >= FLOW.length;
+  const finished = step >= FLOW.length || done.length >= FLOW.length;
+
+  // Where "Next" goes after the current game: next flow step, or baseline reveal at the end
+  function nextHref(fromIdx: number): string {
+    if (fromIdx + 1 >= FLOW.length) return "/baseline?fresh=1";
+    const n = FLOW[fromIdx + 1];
+    return `${n.href}?flow=assessment&step=${fromIdx + 2}&total=${FLOW.length}&next=${encodeURIComponent(nextHref(fromIdx + 1))}`;
+  }
+  function playHref(idx: number): string {
+    const c = FLOW[idx];
+    return `${c.href}?flow=assessment&step=${idx + 1}&total=${FLOW.length}&next=${encodeURIComponent(nextHref(idx))}`;
+  }
 
   return (
     <RequireProfile>
@@ -54,7 +81,7 @@ export default function Assessment() {
           <p className="text-sm font-medium text-[#8a5a00]">{current.blurb}</p>
           {done.includes(current.key) && <p className="chip mx-auto bg-[#d3f5df] text-[#14703a]">✓ Already done — replay to improve</p>}
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Link href={current.href} className="btn-primary flex-1 text-lg">▶ Play now</Link>
+            <Link href={playHref(step)} className="btn-primary flex-1 text-lg">▶ Play now</Link>
             <button onClick={() => setStep(step + 1)} className="btn-ghost flex-1">Skip →</button>
           </div>
           <div className="flex justify-between pt-1">
