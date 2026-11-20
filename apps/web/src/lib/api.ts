@@ -9,8 +9,13 @@ async function req(path: string, init: RequestInit = {}) {
       ...init,
       headers: { "Content-Type": "application/json", "x-api-key": KEY, ...(init.headers || {}) },
     });
-    return r.ok ? await r.json() : null;
-  } catch { return null; }
+    if (r.ok) return await r.json();
+    return null;
+  } catch {
+    // Backend unreachable (e.g. hosted site with no API configured):
+    // seamlessly run the full offline demo instead of showing "Backend offline".
+    return demoResponse(path, init);
+  }
 }
 
 // ---- Web-only demo mode: full journey works with zero backend ----
