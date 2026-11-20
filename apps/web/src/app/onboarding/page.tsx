@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getMe, saveProfile, saveDevice, finishOnboarding, logScreenTime, getAssessmentSet } from "@/lib/api";
+import { saveProfileLocal } from "@/components/RequireProfile";
 
 const STEPS = ["You", "Baseline games", "Devices", "Screen time", "Done"];
 
@@ -42,6 +43,7 @@ export default function Onboarding() {
     if (!gender) { setErr("Please pick a gender option — or 'prefer not to say'."); return; }
     const r = await saveProfile({ name: name.trim(), age: ageNum, gender, country: country.trim(), language: "en" });
     if (!r) { setErr("Backend offline — start the API, then continue."); return; }
+    saveProfileLocal({ name: name.trim(), age: ageNum, gender, country: country.trim() });
     if (r.age_band === "under-13" || r.age_band === "13-17") {
       setErr("Note: MindLoop is built for adults. If you're under 18, please use it with a parent or guardian.");
     }
