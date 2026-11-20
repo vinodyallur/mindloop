@@ -114,8 +114,8 @@ def screentime_latest(db: DB = Depends(DBM.get_db)):
 BASELINE_SET = [
     {"task_key": "pvt", "title": "Vigilance Tap", "why": "Pure attention span in 3 minutes", "href": "/games/pvt", "emoji": "⚡"},
     {"task_key": "shelf", "title": "Remember the Shelf", "why": "See objects for 20s, tap what was there — green means remembered", "href": "/games/shelf", "emoji": "🛒"},
-    {"task_key": "nback", "title": "N-Back 2", "why": "Working memory that holds attention", "href": "/games/nback", "emoji": "🧠"},
-    {"task_key": "steadiness", "title": "Hold Steady", "why": "Mind-body coordination in 30 seconds", "href": "/assessment/steadiness", "emoji": "🤸"},
+    {"task_key": "schulte", "title": "Schulte 25", "why": "Tap 1 to 25 in order — visual scanning speed", "href": "/games/schulte", "emoji": "🔢"},
+    {"task_key": "quiz", "title": "Habits & Puzzles Quiz", "why": "Everyday focus habits plus brain teasers", "href": "/assessment/quiz", "emoji": "❓"},
 ]
 
 @app.get("/api/v1/baseline/assessment-set", dependencies=[Depends(auth)])

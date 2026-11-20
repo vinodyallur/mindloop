@@ -11,7 +11,7 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
-  const [gender, setGender] = useState("prefer_not_to_say");
+  const [gender, setGender] = useState("");
   const [country, setCountry] = useState("");
   const [watch, setWatch] = useState("");
   const [mobile, setMobile] = useState("");
@@ -34,8 +34,12 @@ export default function Onboarding() {
 
   async function submitProfile() {
     setErr("");
-    const ageNum = age.trim() === "" ? null : Number(age);
-    if (ageNum !== null && (!Number.isInteger(ageNum) || ageNum < 5 || ageNum > 120)) { setErr("Age must be a whole number between 5 and 120."); return; }
+    if (!name.trim()) { setErr("Please tell us your name — your buddy needs something to call you."); return; }
+    if (age.trim() === "") { setErr("Please enter your age — it shapes what a healthy baseline looks like for you."); return; }
+    const ageNum = Number(age);
+    if (!Number.isInteger(ageNum) || ageNum < 5 || ageNum > 120) { setErr("Age must be a whole number between 5 and 120."); return; }
+    if (!country.trim()) { setErr("Please enter your country — norms and helplines differ by place."); return; }
+    if (!gender) { setErr("Please pick a gender option — or 'prefer not to say'."); return; }
     const r = await saveProfile({ name: name.trim(), age: ageNum, gender, country: country.trim(), language: "en" });
     if (!r) { setErr("Backend offline — start the API, then continue."); return; }
     if (r.age_band === "under-13" || r.age_band === "13-17") {
@@ -77,18 +81,18 @@ export default function Onboarding() {
         <section className="card mx-auto max-w-xl space-y-4 p-6 sm:p-8">
           <h1 className="text-3xl font-black tracking-tight">👋 First, who are you?</h1>
           <p className="text-sm font-medium text-[#6b6257]">Just the basics so your baseline fits you. Nothing here diagnoses anything.</p>
-          <label className="block text-sm font-bold">Name
+          <label className="block text-sm font-bold">Name <span className="text-[#ff4d6d]">*</span>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="What should your buddy call you?" className="mt-1 w-full rounded-xl border-2 border-[#f0e3cd] px-4 py-2.5 text-sm outline-none focus:border-[#ff4d6d]" />
           </label>
           <div className="grid grid-cols-2 gap-3">
-            <label className="block text-sm font-bold">Age
+            <label className="block text-sm font-bold">Age <span className="text-[#ff4d6d]">*</span>
               <input value={age} onChange={(e) => setAge(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="e.g. 21" className="mt-1 w-full rounded-xl border-2 border-[#f0e3cd] px-4 py-2.5 text-sm outline-none focus:border-[#ff4d6d]" />
             </label>
-            <label className="block text-sm font-bold">Country
+            <label className="block text-sm font-bold">Country <span className="text-[#ff4d6d]">*</span>
               <input value={country} onChange={(e) => setCountry(e.target.value)} placeholder="e.g. India" className="mt-1 w-full rounded-xl border-2 border-[#f0e3cd] px-4 py-2.5 text-sm outline-none focus:border-[#ff4d6d]" />
             </label>
           </div>
-          <div className="text-sm font-bold">Gender
+          <div className="text-sm font-bold">Gender <span className="text-[#ff4d6d]">*</span>
             <div className="mt-1 flex flex-wrap gap-2">
               {[["female", "♀ Female"], ["male", "♂ Male"], ["nonbinary", "⚧ Non-binary"], ["prefer_not_to_say", "🤐 Prefer not to say"]].map(([v, l]) => (
                 <button key={v} onClick={() => setGender(v)} className="rounded-full px-4 py-2 text-xs font-black" style={gender === v ? { background: "#26221c", color: "#fff" } : { background: "#fff1d6", color: "#8a5a00" }}>{l}</button>
@@ -105,7 +109,7 @@ export default function Onboarding() {
           <div className="card p-6 text-center sm:p-8">
             <h1 className="text-3xl font-black tracking-tight">🎮 Your 4 baseline games</h1>
             <p className="mx-auto mt-2 max-w-md text-sm font-medium text-[#6b6257]">
-              These 4 were picked because together they cover <b>attention span</b>, <b>remembering what you see</b>, <b>working memory</b> and <b>mind-body coordination</b>.
+              These 4 were picked because together they cover <b>attention span</b>, <b>visual memory</b>, <b>scanning speed</b> and <b>focus habits</b>.
               Play each once — that draws your starting line.
             </p>
           </div>

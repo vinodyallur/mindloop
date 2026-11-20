@@ -7,16 +7,12 @@ import RequireProfile from "@/components/RequireProfile";
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const KEY = process.env.NEXT_PUBLIC_API_KEY || "demo-key-change-me";
 
-// Guided baseline flow: 7 steps with Next/Skip on every step.
-// Steps 1-4 are games, step 5 is the habits+puzzles quiz, 6-7 are free choice.
+// Guided baseline flow: 4 unique games with Next/Skip on every step.
 const FLOW = [
   { key: "pvt", title: "Vigilance Tap", emoji: "⚡", href: "/games/pvt", blurb: "Pure attention span in 3 minutes" },
   { key: "shelf", title: "Remember the Shelf", emoji: "🛒", href: "/games/shelf", blurb: "See it 20s, tap what was there" },
   { key: "schulte", title: "Schulte 25", emoji: "🔢", href: "/games/schulte", blurb: "Tap 1→25 fast, STOP when done" },
-  { key: "orbit", title: "Orbit Odd-One-Out", emoji: "🪐", href: "/games/orbit", blurb: "Find the rebel ball in 15s" },
   { key: "quiz", title: "Habits & Puzzles Quiz", emoji: "❓", href: "/assessment/quiz", blurb: "Self-reflection + brain teasers — not a diagnosis" },
-  { key: "steadiness", title: "Hold Steady", emoji: "🤸", href: "/assessment/steadiness", blurb: "30s mind-body coordination" },
-  { key: "nback", title: "N-Back 2", emoji: "🧠", href: "/games/nback", blurb: "Working memory that holds attention" },
 ];
 
 export default function Assessment() {

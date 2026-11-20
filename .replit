@@ -1,0 +1,14 @@
+run = "bash replit-run.sh"
+entrypoint = "apps/web/src/app/page.tsx"
+hidden = [".git", "node_modules", ".next", "__pycache__"]
+
+[nix]
+channel = "stable-23_11"
+
+[deployment]
+run = ["sh", "-c", "cd apps/web && npm run build && npm start"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 3000
+externalPort = 80
