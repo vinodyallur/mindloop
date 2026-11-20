@@ -93,12 +93,12 @@ function Inner() {
             <div className="h-full rounded-full bg-[#c026d3] transition-all" style={{ width: `${(left / LIMIT) * 100}%` }} />
           </div>
         </div>
-        <div className="relative h-80 w-full max-w-lg overflow-hidden rounded-[2rem] border-2 border-[#c026d3]/20 bg-white shadow-xl">
+        <div className="relative h-80 w-full max-w-lg overflow-hidden rounded-[2rem] border-2 border-[#c026d3]/20 bg-white shadow-xl sm:h-96">
           {balls.map((b, i) => (
             <button key={i} onClick={() => (b.odd ? finish(true) : finish(false))}
               aria-label={`ball ${i + 1}`}
-              className="absolute h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-lg transition-transform active:scale-90"
-              style={{ left: `${b.x}%`, top: `${b.y}%`, background: b.odd ? "#c026d3" : "#3b82f6" }} />
+              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full shadow transition-transform active:scale-90"
+              style={{ left: `${b.x}%`, top: `${b.y}%`, background: b.odd ? "#c026d3" : "#3b82f6", width: "clamp(14px, 3.2vw, 26px)", height: "clamp(14px, 3.2vw, 26px)" }} />
           ))}
           <p className="absolute bottom-2 w-full text-center text-[11px] font-bold text-[#b3a893]">tap the one going the wrong way</p>
         </div>
