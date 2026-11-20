@@ -4,7 +4,7 @@ import { Done, Intro, useSubmit } from "@/components/TaskShell";
 import RequireProfile from "@/components/RequireProfile";
 import type { Trial } from "@/lib/api";
 
-const N = 9, LIMIT = 15;
+const N = 50, LIMIT = 15;
 
 function Inner() {
   const [phase, setPhase] = useState<"intro" | "run" | "done">("intro");
@@ -77,7 +77,7 @@ function Inner() {
 
   if (phase === "intro") return (
     <Intro title="Orbit Odd-One-Out" cta="Start the orbits"
-      body="9 balls orbit — 8 go one way, 1 sneaks the other way. Find the odd one in 15 seconds and tap it. Over time? Marked 15+."
+      body="50 balls orbit — 49 go one way, 1 sneaks the other way. Find the odd one in 15 seconds and tap it. Over time? Marked 15+."
       onStart={() => setPhase("run")} />
   );
   if (phase === "done") return <Done saved={saved} offline={offline} />;
