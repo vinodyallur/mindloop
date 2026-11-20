@@ -82,3 +82,29 @@ def test_windows_study_fhir_nudge():
     assert c.get(f"/api/v1/referrals/{rid}/fhir", headers=H).json()["resourceType"] == "ServiceRequest"
     assert c.post(f"/api/v1/referrals/{rid}/nudge", json={"channel": "sms"}, headers=H).json()["attempts"] == 1
     assert any(o["id"] == rid for o in c.get("/api/v1/referrals/overdue", headers=H).json())
+
+def test_onboarding_profile_devices():
+    assert c.post("/api/v1/me/profile", json={"name": "Asha", "age": 21, "gender": "female", "country": "India", "language": "en"}, headers=H).json()["age_band"] == "18-25"
+    assert c.post("/api/v1/me/profile", json={"age": 200}, headers=H).status_code == 400
+    d = c.post("/api/v1/me/devices", json={"kind": "watch", "name": "Fire-Boltt"}, headers=H).json()["devices"]
+    assert d["watch"]["name"] == "Fire-Boltt"
+    assert c.post("/api/v1/me/devices", json={"kind": "toaster"}, headers=H).status_code == 400
+    assert c.post("/api/v1/me/onboarding-complete", headers=H).json()["onboarding_done"] is True
+    assert c.get("/api/v1/me", headers=H).json()["onboarding_done"] is True
+
+def test_screentime_validation():
+    assert c.post("/api/v1/screentime", json={"screen_minutes": 300, "doomscroll_minutes": 400}, headers=H).status_code == 400
+    r = c.post("/api/v1/screentime", json={"screen_minutes": 300, "doomscroll_minutes": 90}, headers=H).json()
+    assert r["doomscroll_minutes"] == 90
+    assert c.get("/api/v1/screentime/latest", headers=H).json()[0]["screen_minutes"] == 300
+
+def test_baseline_set_and_daily_plan():
+    s = c.get("/api/v1/baseline/assessment-set", headers=H).json()
+    assert s["total"] == 4 and s["completed"] >= 0
+    p = c.get("/api/v1/plan/today", headers=H).json()
+    assert p["total"] == 6 and len(p["items"]) == 6 and "buddy" in p
+    assert p["items"][-1]["kind"] == "habit"
+    assert c.post("/api/v1/plan/complete", json={"item_key": p["items"][0]["item_key"]}, headers=H).json()["recorded"]
+    assert c.post("/api/v1/plan/complete", json={"item_key": "nope"}, headers=H).status_code == 404
+    p2 = c.get("/api/v1/plan/today", headers=H).json()
+    assert p2["done"] == 1 and p2["buddy"]["tone"] == "encourage"

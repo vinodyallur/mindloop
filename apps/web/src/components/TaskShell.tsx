@@ -9,7 +9,14 @@ export function useSubmit(taskKey: string) {
   const [offline, setOffline] = useState(false);
   async function save(trials: Trial[]) {
     const r = await submitSession(taskKey, trials);
-    if (r) setSaved(r); else setOffline(true);
+    if (r) {
+      setSaved(r);
+      // Mark today's plan item done when the game belongs to the plan
+      try {
+        const { completePlanItem } = await import("@/lib/api");
+        await completePlanItem(taskKey);
+      } catch { /* plan optional — game score still saved */ }
+    } else setOffline(true);
   }
   return { saved, offline, save };
 }
@@ -37,8 +44,9 @@ export function Done({ saved, offline }: { saved: any; offline: boolean }) {
         <p className="card p-4 text-sm text-amber-700">Backend offline — start the API to save &amp; score this session.</p>
       ) : <p className="text-sm text-[#5c564a]">Saving…</p>}
       <p className="text-xs text-[#a39c8c]">Metrics are compared only with your own baseline. No composite score, no diagnosis.</p>
-      <div className="flex gap-3">
-        <Link href="/baseline" className="btn-primary">View baseline</Link>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/today" className="btn-primary">☀️ Back to today's tasks</Link>
+        <Link href="/baseline" className="btn-ghost">View baseline</Link>
         <Link href="/games" className="btn-ghost">More games</Link>
       </div>
     </main>

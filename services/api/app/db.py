@@ -17,7 +17,12 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     display_name = Column(String, default="Demo User")
     age_band = Column(String, default="18-25")
+    age = Column(Integer, nullable=True)
+    gender = Column(String, default="")
+    country = Column(String, default="")
     language = Column(String, default="en")
+    onboarding_done = Column(Integer, default=0)
+    devices_json = Column(Text, default="{}")
     created_at = Column(DateTime, default=now)
 
 class Consent(Base):
@@ -106,6 +111,28 @@ class Completion(Base):
     activity_key = Column(String)
     completed_at = Column(DateTime, default=now)
     result_json = Column(Text, default="{}")
+
+class ScreenTime(Base):
+    __tablename__ = "screen_time"
+    id = Column(String, primary_key=True, default=uid)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    day = Column(String, index=True)  # YYYY-MM-DD
+    screen_minutes = Column(Float, default=0)
+    doomscroll_minutes = Column(Float, default=0)
+    created_at = Column(DateTime, default=now)
+
+class PlanItem(Base):
+    __tablename__ = "plan_items"
+    id = Column(String, primary_key=True, default=uid)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    day = Column(String, index=True)  # YYYY-MM-DD
+    item_key = Column(String)  # game key or habit key e.g. read-15
+    kind = Column(String, default="game")  # game | habit
+    title = Column(String, default="")
+    detail = Column(String, default="")
+    position = Column(Integer, default=0)
+    done = Column(Integer, default=0)
+    completed_at = Column(DateTime, nullable=True)
 
 class Audit(Base):
     __tablename__ = "audit_events"

@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { GAMES } from "@/lib/games";
 import { useLang } from "@/lib/i18n";
+import { getMe, getStreak } from "@/lib/api";
 
 const DOMAIN_STYLE: Record<string, { bg: string; ink: string; emoji: string }> = {
   Attention: { bg: "#d3f5df", ink: "#14703a", emoji: "🎯" },
@@ -19,35 +21,59 @@ const DOMAIN_STYLE: Record<string, { bg: string; ink: string; emoji: string }> =
 
 export default function Home() {
   const { t } = useLang();
+  const [me, setMe] = useState<any>(null);
+  const [streak, setStreak] = useState<any>(null);
+  useEffect(() => {
+    getMe().then(setMe);
+    getStreak().then(setStreak);
+  }, []);
+  const onboarded = !!me?.onboarding_done;
+  const name = me?.display_name && me.display_name !== "Demo User" ? me.display_name : null;
+
   return (
     <main className="mx-auto w-full max-w-[1400px] space-y-12 px-5 py-10">
+      {/* Welcome hero */}
       <section className="relative overflow-hidden rounded-[2rem] border-2 border-[#f0e3cd] bg-white p-8 text-center sm:p-14">
         <span className="floaty absolute left-6 top-6 text-4xl sm:left-12 sm:text-6xl">🧠</span>
         <span className="floaty absolute bottom-8 right-8 text-4xl sm:right-16 sm:text-6xl" style={{ animationDelay: "1.2s" }}>✨</span>
         <span className="floaty absolute right-10 top-8 hidden text-3xl sm:block" style={{ animationDelay: "2s" }}>🎯</span>
-        <p className="chip mx-auto bg-[#ffedb8] text-[#8a5a00]">🎉 {GAMES.length} playful brain games</p>
+        <p className="chip mx-auto bg-[#ffedb8] text-[#8a5a00]">
+          {name ? `👋 Welcome back, ${name}` : "👋 Welcome to MindLoop"}
+        </p>
         <h1 className="mx-auto mt-5 max-w-3xl text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
-          {t("hero").split(" ").slice(0, 3).join(" ")}{" "}
-          <span className="hl hl-coral">{t("hero").split(" ").slice(3, 5).join(" ") || "your focus"}</span>{" "}
-          {t("hero").split(" ").slice(5).join(" ")}
+          Get your <span className="hl hl-coral">baseline</span> done, then grow your <span className="hl hl-teal">brain health</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-[15px] font-medium leading-relaxed text-[#6b6257]">
-          {t("heroSub")}
+        <p className="mx-auto mt-4 max-w-2xl text-[15px] font-medium leading-relaxed text-[#6b6257]">
+          Short games measure your <b>attention span</b> and <b>focus</b>. Daily tasks help you improve them —
+          and spend a little less time <b>doomscrolling</b>. Compared only with your own usual pattern. Never a diagnosis.
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/baseline" className="btn-primary">🚀 {t("seeBaseline")}</Link>
+          {!onboarded ? (
+            <Link href="/onboarding" className="btn-primary text-lg">🌱 Begin assessment</Link>
+          ) : (
+            <Link href="/today" className="btn-primary text-lg">
+              {streak && streak.streak > 0 ? `🔥 Day ${streak.streak + 1} — today's tasks` : "☀️ Today's tasks"}
+            </Link>
+          )}
           <Link href="/games" className="btn-teal">🎮 {t("browseTasks")} · {GAMES.length}</Link>
         </div>
-        <div className="mx-auto mt-8 flex max-w-lg items-center justify-center gap-2 text-xs font-bold text-[#b3a893]">
+        {streak?.buddy && onboarded && (
+          <p className="mx-auto mt-5 max-w-xl rounded-2xl bg-[#fff1d6] px-5 py-3 text-sm font-semibold text-[#8a5a00]">
+            {streak.buddy.text}
+          </p>
+        )}
+        <div className="mx-auto mt-6 flex max-w-lg items-center justify-center gap-2 text-xs font-bold text-[#b3a893]">
           <span className="chip bg-[#d3f5df] text-[#14703a]">✓ {t("notDiagnosis").split("-")[0]}</span>
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      {/* How it works */}
+      <section className="grid gap-4 sm:grid-cols-4">
         {[
-          ["🎮", "1 · Play", "#ffd9e2", "#c2274b", "A 2–4 minute game. Every tap and reaction time is recorded."],
-          ["📈", "2 · Baseline", "#c9f2f1", "#0b6f6e", "Median of your valid sessions becomes your 0–100 index."],
-          ["🔔", "3 · Notice", "#ffedb8", "#8a5a00", "Repeated drift from your band surfaces gently. Never a diagnosis."],
+          ["👋", "1 · You", "#ffd9e2", "#c2274b", "Tell us your name, age, country. 30 seconds."],
+          ["🎮", "2 · Baseline", "#d8e7ff", "#1d4fc4", "Play the 4 best games. That's your starting line."],
+          ["📱", "3 · Connect", "#e9d5ff", "#7e22ce", "Link watch + mobile. Screen time shapes context."],
+          ["🌱", "4 · Grow", "#d3f5df", "#14703a", "5 games + 1 habit daily. Buddy cheers you on."],
         ].map(([emoji, title, bg, ink, d]) => (
           <div key={title} className="card card-lift pop-in p-6" style={{ background: bg, borderColor: "transparent" }}>
             <p className="text-4xl">{emoji}</p>

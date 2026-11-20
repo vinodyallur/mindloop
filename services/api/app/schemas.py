@@ -87,4 +87,26 @@ class ReferralUpdate(BaseModel):
     state: str
     note: str = ""
 
+# ---- Onboarding journey: profile, devices, screen time, daily plan ----
+class ProfileIn(BaseModel):
+    name: str = ""
+    age: Optional[int] = None
+    gender: str = ""  # female | male | nonbinary | prefer_not_to_say
+    country: str = ""
+    language: str = "en"
+
+class DeviceIn(BaseModel):
+    kind: str  # watch | mobile
+    name: str = ""
+    connected: bool = True
+
+class ScreenTimeIn(BaseModel):
+    screen_minutes: float = 0
+    doomscroll_minutes: float = 0
+    day: Optional[str] = None  # YYYY-MM-DD, default today
+
+class PlanCompleteIn(BaseModel):
+    item_key: str
+    result: dict = {}
+
 CRISIS_WORDS = ["suicide", "kill myself", "end my life", "self-harm", "self harm", "hurt myself"]

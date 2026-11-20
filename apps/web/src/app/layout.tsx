@@ -9,6 +9,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   const { lang, setLang, t } = useLang();
   const nav = [
     { href: "/", label: t("home") },
+    { href: "/today", label: "Today" },
     { href: "/baseline", label: t("baseline") },
     { href: "/games", label: t("train") },
     { href: "/outcomes", label: t("outcomes") },
@@ -53,8 +54,9 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="grid grid-cols-5 px-2 py-2">
           {[
             { href: "/", label: t("home"), c: "#ff4d6d" },
+            { href: "/today", label: "Today", c: "#f97316" },
             { href: "/baseline", label: t("baseline"), c: "#0ea5a4" },
-            { href: "/games", label: t("train"), c: "#f97316" },
+            { href: "/games", label: t("train"), c: "#22c55e" },
             { href: "/dashboard", label: t("stats"), c: "#3b82f6" },
             { href: "/settings", label: t("settings"), c: "#c026d3" },
           ].map((n) => (

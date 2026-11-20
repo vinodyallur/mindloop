@@ -17,10 +17,14 @@ export default function Baseline() {
   const [data, setData] = useState<any>(null);
   const [task, setTask] = useState("");
   const [metric, setMetric] = useState("");
+  const [aset, setAset] = useState<any>(null);
+  const [screen, setScreen] = useState<any[]>([]);
   useEffect(() => {
     const q = `?task_key=${task}&metric_key=${metric}&window=30`;
     req(`/api/v1/baseline/index${q}`).then(setData);
     req("/api/v1/baseline/forecast").then((f) => f && setData((d: any) => (d ? { ...d, forecast: f } : d)));
+    req("/api/v1/baseline/assessment-set").then(setAset);
+    req("/api/v1/screentime/latest").then((s) => s && setScreen(s));
   }, [task, metric]);
   const series = useMemo(() => (data?.series || []).map((s: any, i: number) => ({ i: i + 1, index: s.index, task: s.task_key })), [data]);
   const tasks = useMemo(() => Array.from(new Set((data?.series || []).map((s: any) => s.task_key as string))), [data]);
@@ -33,6 +37,30 @@ export default function Baseline() {
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Your Index</h1>
         <p className="mt-1 max-w-xl text-sm text-[#5c564a]">0 = far below your usual pattern · 50 = at your baseline median · 100 = far above. Descriptive only — never a diagnosis.</p>
       </header>
+
+      {aset && !aset.baseline_ready && (
+        <section className="card border-l-4 p-5" style={{ borderLeftColor: "#ff4d6d" }}>
+          <h2 className="text-sm font-black">🎮 Finish your 4 baseline games ({aset.completed}/{aset.total})</h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {aset.items.map((g: any) => (
+              <Link key={g.task_key} href={g.href} className="chip" style={g.done ? { background: "#d3f5df", color: "#14703a" } : { background: "#ffedb8", color: "#8a5a00" }}>
+                {g.done ? "✓" : g.emoji} {g.title}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {screen.length > 0 && (
+        <section className="card p-5">
+          <h2 className="text-sm font-semibold">📵 Screen-time context <span className="font-normal text-[#a39c8c]">(shapes baseline story)</span></h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {screen.slice(0, 7).map((s: any) => (
+              <span key={s.day} className="chip bg-[#eee9fb] text-[#5b21b6]">{s.day.slice(5)} · 📱{Math.round(s.screen_minutes)}m · 🌀{Math.round(s.doomscroll_minutes)}m</span>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <select value={task} onChange={(e) => setTask(e.target.value)} className="rounded-full border border-[#e5ddcc] bg-white px-4 py-2 text-sm">
@@ -109,7 +137,10 @@ export default function Baseline() {
         </section>
       )}
 
-      <Link href="/games" className="btn-primary">Practice to grow your baseline</Link>
+      <div className="flex flex-wrap gap-3">
+        <Link href="/today" className="btn-primary">☀️ Today's tasks</Link>
+        <Link href="/games" className="btn-ghost">Practice to grow your baseline</Link>
+      </div>
     </main>
   );
 }

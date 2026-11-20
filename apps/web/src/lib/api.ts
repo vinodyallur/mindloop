@@ -50,6 +50,20 @@ export const assignArm = (arm: string) =>
 export const getModelCard = () => req("/api/v1/model-card");
 export const setConsent = (data_category: string, granted: boolean) =>
   req("/api/v1/consents", { method: "POST", body: JSON.stringify({ data_category, granted }) });
+export const getMe = () => req("/api/v1/me");
+export const saveProfile = (p: { name: string; age: number | null; gender: string; country: string; language: string }) =>
+  req("/api/v1/me/profile", { method: "POST", body: JSON.stringify(p) });
+export const saveDevice = (kind: string, name: string, connected = true) =>
+  req("/api/v1/me/devices", { method: "POST", body: JSON.stringify({ kind, name, connected }) });
+export const finishOnboarding = () => req("/api/v1/me/onboarding-complete", { method: "POST" });
+export const logScreenTime = (screen_minutes: number, doomscroll_minutes: number) =>
+  req("/api/v1/screentime", { method: "POST", body: JSON.stringify({ screen_minutes, doomscroll_minutes }) });
+export const getScreenTime = () => req("/api/v1/screentime/latest");
+export const getAssessmentSet = () => req("/api/v1/baseline/assessment-set");
+export const getPlanToday = () => req("/api/v1/plan/today");
+export const completePlanItem = (item_key: string, result: Record<string, any> = {}) =>
+  req("/api/v1/plan/complete", { method: "POST", body: JSON.stringify({ item_key, result }) });
+export const getStreak = () => req("/api/v1/plan/streak");
 export const completeActivity = (activity_key: string) =>
   req("/api/v1/program/completions", { method: "POST", body: JSON.stringify({ activity_key, result: {} }) });
 export const syncDemoWearables = () => {

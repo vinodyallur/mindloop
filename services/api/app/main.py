@@ -41,9 +41,189 @@ def health(): return {"status": "ok", "service": "mindloop", "diagnostic": False
 def me(db: DB = Depends(DBM.get_db)):
     u = get_user(db)
     consents = {c.data_category: c.revoked_at is None for c in db.query(DBM.Consent).filter_by(user_id=u.id)}
+    import json
+    try: devices = json.loads(u.devices_json or "{}")
+    except Exception: devices = {}
     return {"id": u.id, "email": u.email, "display_name": u.display_name, "age_band": u.age_band,
-            "language": u.language, "consents": consents,
+            "age": u.age, "gender": u.gender, "country": u.country,
+            "language": u.language, "onboarding_done": bool(u.onboarding_done),
+            "devices": devices, "consents": consents,
             "notice": "MindLoop is not a diagnostic device and does not diagnose any condition."}
+
+@app.post("/api/v1/me/profile", dependencies=[Depends(auth)])
+def save_profile(body: ProfileIn, db: DB = Depends(DBM.get_db)):
+    """Onboarding step 2: name, age, gender, country, language."""
+    u = get_user(db)
+    if body.age is not None and not (5 <= body.age <= 120):
+        raise HTTPException(400, "age must be between 5 and 120")
+    if body.gender and body.gender not in ("female", "male", "nonbinary", "prefer_not_to_say"):
+        raise HTTPException(400, "unknown gender option")
+    if body.name: u.display_name = body.name[:80]
+    if body.age is not None:
+        u.age = body.age
+        u.age_band = "under-13" if body.age < 13 else "13-17" if body.age < 18 else "18-25" if body.age <= 25 else "26-40" if body.age <= 40 else "40+"
+    if body.gender: u.gender = body.gender
+    if body.country: u.country = body.country[:80]
+    if body.language: u.language = body.language[:10]
+    db.add(DBM.Audit(user_id=u.id, event_type="profile_update", metadata_json=DBM.dumps({"country": u.country, "age_band": u.age_band})))
+    db.commit()
+    return {"saved": True, "age_band": u.age_band}
+
+@app.post("/api/v1/me/devices", dependencies=[Depends(auth)])
+def save_device(body: DeviceIn, db: DB = Depends(DBM.get_db)):
+    """Onboarding step 4: connect smartwatch / mobile for tracking."""
+    import json
+    if body.kind not in ("watch", "mobile"): raise HTTPException(400, "kind must be watch|mobile")
+    u = get_user(db)
+    try: devices = json.loads(u.devices_json or "{}")
+    except Exception: devices = {}
+    devices[body.kind] = {"name": body.name[:80], "connected": body.connected}
+    u.devices_json = DBM.dumps(devices)
+    db.commit()
+    return {"devices": devices}
+
+@app.post("/api/v1/me/onboarding-complete", dependencies=[Depends(auth)])
+def onboarding_complete(db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    u.onboarding_done = 1
+    db.commit()
+    return {"onboarding_done": True}
+
+@app.post("/api/v1/screentime", dependencies=[Depends(auth)])
+def log_screentime(body: ScreenTimeIn, db: DB = Depends(DBM.get_db)):
+    """Daily mobile-use log: total screen + doomscroll minutes. Affects baseline context."""
+    from datetime import timezone
+    if body.screen_minutes < 0 or body.doomscroll_minutes < 0: raise HTTPException(400, "minutes must be >= 0")
+    if body.doomscroll_minutes > body.screen_minutes: raise HTTPException(400, "doomscroll cannot exceed screen time")
+    u = get_user(db)
+    day = body.day or datetime.now(timezone.utc).date().isoformat()
+    r = db.query(DBM.ScreenTime).filter_by(user_id=u.id, day=day).first()
+    if not r:
+        r = DBM.ScreenTime(user_id=u.id, day=day); db.add(r)
+    r.screen_minutes, r.doomscroll_minutes = body.screen_minutes, body.doomscroll_minutes
+    db.commit()
+    return {"day": day, "screen_minutes": r.screen_minutes, "doomscroll_minutes": r.doomscroll_minutes}
+
+@app.get("/api/v1/screentime/latest", dependencies=[Depends(auth)])
+def screentime_latest(db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    rows = db.query(DBM.ScreenTime).filter_by(user_id=u.id).order_by(DBM.ScreenTime.day.desc()).limit(14).all()
+    return [{"day": r.day, "screen_minutes": r.screen_minutes, "doomscroll_minutes": r.doomscroll_minutes} for r in rows]
+
+# ---- Baseline assessment set: 4 best tasks for first baseline ----
+BASELINE_SET = [
+    {"task_key": "pvt", "title": "Vigilance Tap", "why": "Pure attention span in 3 minutes", "href": "/games/pvt", "emoji": "⚡"},
+    {"task_key": "sart", "title": "Steady Response", "why": "Focus under monotony — doomscroll resistance", "href": "/games/sart", "emoji": "🎯"},
+    {"task_key": "nback", "title": "N-Back 2", "why": "Working memory that holds attention", "href": "/games/nback", "emoji": "🧠"},
+    {"task_key": "steadiness", "title": "Hold Steady", "why": "Mind-body coordination in 30 seconds", "href": "/assessment/steadiness", "emoji": "🤸"},
+]
+
+@app.get("/api/v1/baseline/assessment-set", dependencies=[Depends(auth)])
+def baseline_assessment_set(db: DB = Depends(DBM.get_db)):
+    u = get_user(db)
+    done = {s.task_key for s in db.query(DBM.Session).filter_by(user_id=u.id, validity_status="valid")}
+    items = [{**t, "done": t["task_key"] in done} for t in BASELINE_SET]
+    return {"items": items, "completed": sum(1 for t in items if t["done"]), "total": len(items),
+            "baseline_ready": sum(1 for t in items if t["done"]) >= 4}
+
+# ---- Daily plan: 5 mandatory games + 1 habit, grows with baseline ----
+PLAN_GAMES = [
+    ("pvt", "Vigilance Tap", "/games/pvt"), ("sart", "Steady Response", "/games/sart"),
+    ("flanker", "Flanker Field", "/games/flanker"), ("nback", "N-Back 2", "/games/nback"),
+    ("span", "Digit Span", "/games/span"), ("pairs", "Pair Match", "/games/pairs"),
+    ("search", "Visual Search", "/games/search"), ("trail", "Trail Connect", "/games/trail"),
+    ("switch", "Rule Switch", "/games/switch"), ("dual", "Dual Track", "/games/dual"),
+    ("stopsignal", "Stop Signal", "/games/stopsignal"), ("choice", "Choice Rush", "/games/choice"),
+    ("math", "Mental Math", "/games/math"), ("rotate", "Rotate Fit", "/games/rotate"),
+    ("pattern", "Pattern Complete", "/games/pattern"), ("grid", "Grid Recall", "/games/grid"),
+    ("sequence", "Sequence Echo", "/games/sequence"), ("odd", "Odd One Out", "/games/odd"),
+    ("rhythm", "Rhythm Tap", "/games/rhythm"), ("trace", "Trace Path", "/games/trace"),
+]
+PLAN_HABITS = [
+    ("read-15", "Read a book for 15 minutes", "Phone face-down. Any book you enjoy.", 15),
+    ("walk-10", "Walk for 10 minutes", "No phone scrolling while you walk.", 10),
+    ("breathe-2", "2-minute breathing reset", "Inhale 4s, hold 4s, exhale 6s.", 2),
+    ("sleep-8", "Lights out by your bedtime", "No screens 30 min before sleep.", 8),
+    ("sun-10", "10 minutes of daylight", "Step outside or sit by a window.", 10),
+]
+
+def _day_index(user_id: str, day: str) -> int:
+    return 1
+
+@app.get("/api/v1/plan/today", dependencies=[Depends(auth)])
+def plan_today(db: DB = Depends(DBM.get_db)):
+    """Buddy daily plan: 5 games (rotating, difficulty grows) + 1 habit. Idempotent per day."""
+    from datetime import timezone, date
+    u = get_user(db)
+    day = datetime.now(timezone.utc).date().isoformat()
+    existing = db.query(DBM.PlanItem).filter_by(user_id=u.id, day=day).order_by(DBM.PlanItem.position).all()
+    if not existing:
+        first_session = db.query(DBM.Session).filter_by(user_id=u.id).order_by(DBM.Session.started_at).first()
+        day_n = 1
+        if first_session and first_session.started_at:
+            try: day_n = max(1, (date.fromisoformat(day) - first_session.started_at.date()).days + 1)
+            except Exception: day_n = 1
+        start = (day_n - 1) * 5 % len(PLAN_GAMES)
+        games = [PLAN_GAMES[(start + i) % len(PLAN_GAMES)] for i in range(5)]
+        habit = PLAN_HABITS[(day_n - 1) % len(PLAN_HABITS)]
+        pos = 0
+        for key, title, href in games:
+            db.add(DBM.PlanItem(user_id=u.id, day=day, item_key=key, kind="game", title=title, detail=href, position=pos)); pos += 1
+        db.add(DBM.PlanItem(user_id=u.id, day=day, item_key=habit[0], kind="habit", title=habit[1], detail=habit[2], position=pos))
+        db.commit()
+        existing = db.query(DBM.PlanItem).filter_by(user_id=u.id, day=day).order_by(DBM.PlanItem.position).all()
+    # buddy streak: consecutive days with >=1 plan item done
+    streak, cursor = 0, date.fromisoformat(day)
+    from datetime import timedelta
+    while True:
+        d = cursor.isoformat()
+        done_any = db.query(DBM.PlanItem).filter_by(user_id=u.id, day=d, done=1).count() > 0
+        any_items = db.query(DBM.PlanItem).filter_by(user_id=u.id, day=d).count() > 0
+        if done_any: streak += 1; cursor -= timedelta(days=1); continue
+        if d == day and not any_items: break
+        if d == day: break  # today not started yet — don't break streak
+        break
+    items = [{"item_key": p.item_key, "kind": p.kind, "title": p.title, "detail": p.detail, "done": bool(p.done)} for p in existing]
+    done_n = sum(1 for p in existing if p.done)
+    buddy = buddy_message(streak, done_n, len(items), day, db, u.id)
+    return {"day": day, "items": items, "done": done_n, "total": len(items),
+            "streak": streak, "buddy": buddy}
+
+def buddy_message(streak: int, done_n: int, total: int, day: str, db: DB, user_id: str) -> dict:
+    from datetime import timedelta, date
+    yesterday = (date.fromisoformat(day) - timedelta(days=1)).isoformat()
+    y_items = db.query(DBM.PlanItem).filter_by(user_id=user_id, day=yesterday).all()
+    y_missed = bool(y_items) and not any(p.done for p in y_items)
+    if done_n >= total:
+        return {"tone": "celebrate", "text": f"All {total} done! Your baseline thanks you. Rest well — see you tomorrow. 🌟", "streak": streak}
+    if done_n > 0:
+        return {"tone": "encourage", "text": f"{done_n} of {total} done — nice work. Even one small task moves your baseline. 💪", "streak": streak}
+    if y_missed:
+        return {"tone": "kind", "text": "Missed yesterday? That's completely okay — streaks don't define you. Today is a fresh page. Just one task. 🤗", "streak": streak}
+    if streak >= 3:
+        return {"tone": "warm", "text": f"{streak}-day streak going! Your attention span is building quietly in the background. 🌱", "streak": streak}
+    return {"tone": "welcome", "text": "Hey, buddy here. Small steps today — pick just one task to start. No pressure. 🙂", "streak": streak}
+
+@app.post("/api/v1/plan/complete", dependencies=[Depends(auth)])
+def plan_complete(body: PlanCompleteIn, db: DB = Depends(DBM.get_db)):
+    from datetime import timezone
+    u = get_user(db)
+    day = datetime.now(timezone.utc).date().isoformat()
+    p = db.query(DBM.PlanItem).filter_by(user_id=u.id, day=day, item_key=body.item_key).first()
+    if not p: raise HTTPException(404, "plan item not found for today")
+    p.done, p.completed_at = 1, DBM.now()
+    db.add(DBM.Completion(user_id=u.id, activity_key=f"plan:{body.item_key}", result_json=DBM.dumps(body.result)))
+    _touch_habit_day(db, u.id)
+    db.commit()
+    return {"recorded": body.item_key}
+
+@app.get("/api/v1/plan/streak", dependencies=[Depends(auth)])
+def plan_streak(db: DB = Depends(DBM.get_db)):
+    from datetime import timezone
+    u = get_user(db)
+    day = datetime.now(timezone.utc).date().isoformat()
+    t = plan_today(db)
+    return {"streak": t["streak"], "buddy": t["buddy"], "day": day}
 
 @app.post("/api/v1/users", dependencies=[Depends(auth)])
 def create_user(body: UserIn, db: DB = Depends(DBM.get_db)):
