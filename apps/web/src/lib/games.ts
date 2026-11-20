@@ -9,6 +9,8 @@ export interface GameDef {
 export const GAMES: GameDef[] = [
   { key: "cpt", title: "Sustained Focus", domain: "Attention", minutes: 4, mechanic: "CPT: respond to rare targets", evidence: "Conners CPT-3 / TOVA paradigm", href: "/assessment/cpt" },
   { key: "shelf", title: "Remember the Shelf", domain: "Memory", minutes: 2, mechanic: "Memorize 6 objects in 20s, tap what was there — green = remembered, red = intruder", evidence: "Visual recognition memory", href: "/games/shelf" },
+  { key: "orbit", title: "Orbit Odd-One-Out", domain: "Attention", minutes: 1, mechanic: "9 balls orbit, 1 goes the wrong way — find it in 15s (15+ if over)", evidence: "Motion-direction oddball", href: "/games/orbit" },
+  { key: "schulte", title: "Schulte 25", domain: "Attention", minutes: 1, mechanic: "Tap 1→25 in order, STOP when done — 25+ if over 25s", evidence: "Schulte table / visual scanning", href: "/games/schulte" },
   { key: "stroop", title: "Color Clash", domain: "Inhibition", minutes: 3, mechanic: "Name ink color, ignore word", evidence: "Stroop effect", href: "/assessment/stroop" },
   { key: "flanker", title: "Flanker Field", domain: "Attention", minutes: 3, mechanic: "Respond to center arrow among flankers", evidence: "Eriksen flanker task", href: "/games/flanker" },
   { key: "sart", title: "Steady Response", domain: "Attention", minutes: 3, mechanic: "Go-heavy vigilance, withhold rare digit", evidence: "SART mind-wandering paradigm", href: "/games/sart" },

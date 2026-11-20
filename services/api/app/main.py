@@ -130,7 +130,8 @@ def baseline_assessment_set(db: DB = Depends(DBM.get_db)):
 PLAN_GAMES = [
     ("pvt", "Vigilance Tap", "/games/pvt"), ("sart", "Steady Response", "/games/sart"),
     ("flanker", "Flanker Field", "/games/flanker"), ("nback", "N-Back 2", "/games/nback"),
-    ("shelf", "Remember the Shelf", "/games/shelf"), ("span", "Digit Span", "/games/span"),
+    ("shelf", "Remember the Shelf", "/games/shelf"), ("orbit", "Orbit Odd-One-Out", "/games/orbit"),
+    ("schulte", "Schulte 25", "/games/schulte"), ("span", "Digit Span", "/games/span"),
     ("pairs", "Pair Match", "/games/pairs"), ("search", "Visual Search", "/games/search"),
     ("trail", "Trail Connect", "/games/trail"), ("switch", "Rule Switch", "/games/switch"),
     ("dual", "Dual Track", "/games/dual"), ("stopsignal", "Stop Signal", "/games/stopsignal"),
