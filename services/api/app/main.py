@@ -113,7 +113,7 @@ def screentime_latest(db: DB = Depends(DBM.get_db)):
 # ---- Baseline assessment set: 4 best tasks for first baseline ----
 BASELINE_SET = [
     {"task_key": "pvt", "title": "Vigilance Tap", "why": "Pure attention span in 3 minutes", "href": "/games/pvt", "emoji": "⚡"},
-    {"task_key": "sart", "title": "Steady Response", "why": "Focus under monotony — doomscroll resistance", "href": "/games/sart", "emoji": "🎯"},
+    {"task_key": "shelf", "title": "Remember the Shelf", "why": "See objects for 20s, tap what was there — green means remembered", "href": "/games/shelf", "emoji": "🛒"},
     {"task_key": "nback", "title": "N-Back 2", "why": "Working memory that holds attention", "href": "/games/nback", "emoji": "🧠"},
     {"task_key": "steadiness", "title": "Hold Steady", "why": "Mind-body coordination in 30 seconds", "href": "/assessment/steadiness", "emoji": "🤸"},
 ]
@@ -130,14 +130,14 @@ def baseline_assessment_set(db: DB = Depends(DBM.get_db)):
 PLAN_GAMES = [
     ("pvt", "Vigilance Tap", "/games/pvt"), ("sart", "Steady Response", "/games/sart"),
     ("flanker", "Flanker Field", "/games/flanker"), ("nback", "N-Back 2", "/games/nback"),
-    ("span", "Digit Span", "/games/span"), ("pairs", "Pair Match", "/games/pairs"),
-    ("search", "Visual Search", "/games/search"), ("trail", "Trail Connect", "/games/trail"),
-    ("switch", "Rule Switch", "/games/switch"), ("dual", "Dual Track", "/games/dual"),
-    ("stopsignal", "Stop Signal", "/games/stopsignal"), ("choice", "Choice Rush", "/games/choice"),
-    ("math", "Mental Math", "/games/math"), ("rotate", "Rotate Fit", "/games/rotate"),
-    ("pattern", "Pattern Complete", "/games/pattern"), ("grid", "Grid Recall", "/games/grid"),
-    ("sequence", "Sequence Echo", "/games/sequence"), ("odd", "Odd One Out", "/games/odd"),
-    ("rhythm", "Rhythm Tap", "/games/rhythm"), ("trace", "Trace Path", "/games/trace"),
+    ("shelf", "Remember the Shelf", "/games/shelf"), ("span", "Digit Span", "/games/span"),
+    ("pairs", "Pair Match", "/games/pairs"), ("search", "Visual Search", "/games/search"),
+    ("trail", "Trail Connect", "/games/trail"), ("switch", "Rule Switch", "/games/switch"),
+    ("dual", "Dual Track", "/games/dual"), ("stopsignal", "Stop Signal", "/games/stopsignal"),
+    ("choice", "Choice Rush", "/games/choice"), ("math", "Mental Math", "/games/math"),
+    ("rotate", "Rotate Fit", "/games/rotate"), ("pattern", "Pattern Complete", "/games/pattern"),
+    ("grid", "Grid Recall", "/games/grid"), ("sequence", "Sequence Echo", "/games/sequence"),
+    ("odd", "Odd One Out", "/games/odd"), ("rhythm", "Rhythm Tap", "/games/rhythm"),
 ]
 PLAN_HABITS = [
     ("read-15", "Read a book for 15 minutes", "Phone face-down. Any book you enjoy.", 15),
@@ -675,6 +675,145 @@ def report(db: DB = Depends(DBM.get_db)):
             "limitations": ["Browser timing is not laboratory-grade.", "Sleep, stress, illness and practice affect results.",
                             "Wearable data shown is DEMO until Fire-Boltt/Health Connect is verified on your phone."],
             "next_steps": ["Repeat tasks at a similar time of day.", "Discuss persistent concerns with a qualified professional."]}
+
+@app.get("/api/v1/reports/story", dependencies=[Depends(auth)])
+def report_story(db: DB = Depends(DBM.get_db)):
+    """Kid-friendly story report: coordination, attention span, focus, memory,
+    screen-time context, and concrete improvements. No numbers jargon, no diagnosis."""
+    import json
+    u = get_user(db)
+    name = u.display_name if u.display_name and u.display_name != "Demo User" else "friend"
+    idx = baseline_index(db=db)
+    sessions = db.query(DBM.Session).filter_by(user_id=u.id, validity_status="valid").order_by(DBM.Session.completed_at).all()
+    n = len(sessions)
+    cur = idx.get("index")
+    trend = idx.get("trend_delta")
+
+    def level(v):
+        if v is None: return None
+        if v >= 70: return "super"
+        if v >= 55: return "good"
+        if v >= 40: return "growing"
+        return "sleepy"
+
+    # Per-task best index from series
+    by_task = {}
+    for s in idx.get("series", []):
+        if s.get("index") is not None:
+            by_task.setdefault(s["task_key"], []).append(s["index"])
+    task_best = {k: round(sum(v) / len(v), 1) for k, v in by_task.items()}
+
+    coord = task_best.get("steadiness")
+    attention = task_best.get("pvt", task_best.get("cpt"))
+    focus = task_best.get("sart", task_best.get("flanker"))
+    memory = task_best.get("nback", task_best.get("span", task_best.get("pairs")))
+
+    cards = []
+    cards.append({
+        "title": "🎯 Attention span",
+        "level": level(attention),
+        "story": _story_for("attention", attention, n),
+    })
+    cards.append({
+        "title": "🔎 Focus",
+        "level": level(focus),
+        "story": _story_for("focus", focus, n),
+    })
+    cards.append({
+        "title": "🤸 Coordination",
+        "level": level(coord),
+        "story": _story_for("coordination", coord, n),
+    })
+    cards.append({
+        "title": "🧠 Memory",
+        "level": level(memory),
+        "story": _story_for("memory", memory, n),
+    })
+
+    # Screen-time context
+    rows = db.query(DBM.ScreenTime).filter_by(user_id=u.id).order_by(DBM.ScreenTime.day.desc()).limit(7).all()
+    screen_card = None
+    if rows:
+        avg_s = sum(r.screen_minutes for r in rows) / len(rows)
+        avg_d = sum(r.doomscroll_minutes for r in rows) / len(rows)
+        screen_card = {
+            "title": "📵 Screen-time sidekick",
+            "level": "good" if avg_d <= 60 else "growing" if avg_d <= 150 else "sleepy",
+            "story": (f"You scroll about {round(avg_s)} minutes a day, and {round(avg_d)} of those are doomscrolling. "
+                      + ("That's light — your eyes and brain get lots of rest. " if avg_d <= 60
+                         else "Cutting even 15 minutes of scrolling can make focus games feel easier. "
+                         if avg_d <= 150 else "Lots of scrolling can make your brain feel tired. Try swapping 15 scroll-minutes for a walk. ")),
+        }
+
+    improvements = _improvements_for(level(cur), trend, rows[0] if rows else None, n)
+
+    if cur is None:
+        headline = f"Hey {name}! Play your 4 baseline games and I'll write your story here. 🌱"
+    elif level(cur) == "super":
+        headline = f"Wow {name}, your brain is on fire! Your baseline is {round(cur)} out of 100. 🔥"
+    elif level(cur) == "good":
+        headline = f"Nice going {name}! Your baseline is {round(cur)} out of 100 and climbing. 💪"
+    elif level(cur) == "growing":
+        headline = f"Hey {name}, your baseline is {round(cur)} out of 100 — a young plant getting stronger every day. 🌱"
+    else:
+        headline = f"Hey {name}, your baseline is {round(cur)} out of 100. Tired brains can wake up — small steps work. 🤗"
+
+    trend_line = ""
+    if trend is not None and n >= 3:
+        trend_line = (f"Lately you've moved {'up' if trend >= 0 else 'down'} by {abs(round(trend, 1))} points. "
+                      + ("Keep doing what you're doing! " if trend >= 0 else "That's okay — sleep, mood and busy days move scores around. "))
+
+    return {"headline": headline, "trend_line": trend_line, "index": cur, "sessions": n,
+            "cards": cards, "screen_card": screen_card, "improvements": improvements,
+            "note": "A friendly story about your games. Not a medical report, not a diagnosis."}
+
+def _story_for(area: str, value, n: int) -> str:
+    if value is None or n == 0:
+        return {"attention": "We haven't measured your attention span yet — play Vigilance Tap and I'll tell you all about it! ⚡",
+                "focus": "We haven't measured your focus yet — play Steady Response and come back! 🎯",
+                "coordination": "We haven't measured your coordination yet — try Hold Steady for 30 seconds! 🤸",
+                "memory": "We haven't measured your memory yet — play Remember the Shelf! 🛒"}[area]
+    v, lvl = round(value), ("super" if value >= 70 else "good" if value >= 55 else "growing" if value >= 40 else "sleepy")
+    base = {"attention": f"Your attention span scores {v} out of 100. ",
+            "focus": f"Your focus scores {v} out of 100. ",
+            "coordination": f"Your coordination scores {v} out of 100. ",
+            "memory": f"Your memory scores {v} out of 100. "}[area]
+    detail = {
+        "attention": {"super": "You can stick with boring things for a long time — like a cat watching a mouse hole. 🐱",
+                      "good": "You keep watching even when it's dull. That's the exact muscle doomscrolling weakens — and you're training it! 💪",
+                      "growing": "Your attention is like a young plant — it looks away sometimes, and every game waters it. 🌱",
+                      "sleepy": "Your attention feels sleepy right now. Tired brains wander — more sleep and less scrolling wake it up. 😴"},
+        "focus": {"super": "Distractions bounce right off you — like rain off a raincoat! 🧥",
+                  "good": "You mostly ignore the tricky bits and catch the right ones. Sharp eyes! 👀",
+                  "growing": "Sometimes the tricky bits fool you — that's normal, your focus filter is still learning. 🔎",
+                  "sleepy": "Everything grabs your attention right now. That's okay — it means your brain needs rest, not scolding. 🤗"},
+        "coordination": {"super": "Your hands are super steady — like a surgeon or an artist! 🎨",
+                         "good": "Your hands hold nice and still. Good teamwork between brain and body! 🤝",
+                         "growing": "A little wobble is totally normal — even grown-ups wobble. Practice makes it smoother. 🌊",
+                         "sleepy": "Lots of wobble today — tired hands wobble more. Try again after rest. 💤"},
+        "memory": {"super": "Your memory is like an elephant — it never forgets! 🐘",
+                   "good": "You remember most things you see. Your brain's sticky notes are working well! 📝",
+                   "growing": "Some things slip away — that's how all brains start. Each game adds more sticky notes! 📌",
+                   "sleepy": "Things slip away fast right now. Sleep is when memories get saved — check your bedtime. 🌙"},
+    }[area][lvl]
+    return base + detail
+
+def _improvements_for(lvl, trend, latest_screen, n: int):
+    tips = []
+    if n < 4:
+        tips.append({"emoji": "🎮", "text": "Finish your 4 baseline games first — that's the starting line everything is measured from."})
+    tips.append({"emoji": "📖", "text": "Read a book for 15 minutes a day. Readers beat scrollers at attention games — every single time."})
+    if latest_screen and latest_screen.doomscroll_minutes > 60:
+        tips.append({"emoji": "📵", "text": f"You doomscroll ~{round(latest_screen.doomscroll_minutes)} min a day. Swap 15 of those minutes for a walk and watch your focus scores climb."})
+    else:
+        tips.append({"emoji": "📵", "text": "Keep doomscrolling small. When you catch yourself scrolling, ask: 'am I enjoying this, or just scrolling?'"})
+    if trend is not None and trend < 0:
+        tips.append({"emoji": "😴", "text": "Your scores dipped a little. The usual suspects: less sleep, more stress, or playing while tired. Rest is training too."})
+    else:
+        tips.append({"emoji": "🎯", "text": "Play your 5 daily games at the same time each day — brains love routine, and scores get steadier."})
+    tips.append({"emoji": "🤸", "text": "Do the 30-second Hold Steady every day. Steady hands mean a calm, focused brain."})
+    tips.append({"emoji": "🌙", "text": "Sleep 8 hours. Memories from today's games get saved overnight — no sleep, no saving."})
+    return tips[:5]
 
 @app.post("/api/v1/me/export", dependencies=[Depends(auth)])
 def export(db: DB = Depends(DBM.get_db)):

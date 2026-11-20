@@ -12,6 +12,7 @@ export default function Report() {
       <header>
         <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Plain-language summary</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Your Report</h1>
+        <Link href="/report/story" className="btn-primary mt-4">📖 Generate my story report — written for a 10-year-old</Link>
       </header>
       <p className="card p-4 text-[13px] text-[#5c564a]">{r.summary}</p>
       <section className="card p-5"><h2 className="text-sm font-semibold">Baseline</h2>

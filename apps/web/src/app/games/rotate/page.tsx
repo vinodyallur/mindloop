@@ -1,4 +1,5 @@
 "use client";
+import RequireProfile from "@/components/RequireProfile";
 import { ChoiceGame } from "@/components/engines";
 
 function gen() {
@@ -19,6 +20,7 @@ function gen() {
 
 export default function Page() {
   return (
+    <RequireProfile>
     <ChoiceGame
       taskKey="rotate"
       title="Rotate Fit"
@@ -27,5 +29,6 @@ export default function Page() {
       options={["Same", "Different"]}
       gen={gen}
     />
+    </RequireProfile>
   );
 }

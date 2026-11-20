@@ -108,3 +108,10 @@ def test_baseline_set_and_daily_plan():
     assert c.post("/api/v1/plan/complete", json={"item_key": "nope"}, headers=H).status_code == 404
     p2 = c.get("/api/v1/plan/today", headers=H).json()
     assert p2["done"] == 1 and p2["buddy"]["tone"] == "encourage"
+
+def test_story_report_kid_friendly():
+    s = c.get("/api/v1/reports/story", headers=H).json()
+    assert "headline" in s and "cards" in s and "improvements" in s
+    assert len(s["cards"]) == 4 and len(s["improvements"]) >= 3
+    assert "diagnosis" in s["note"].lower() or "Not a medical" in s["note"]
+    assert all("story" in card and "level" in card for card in s["cards"])

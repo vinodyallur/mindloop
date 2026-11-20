@@ -8,7 +8,7 @@ export interface GameDef {
 // personal baseline via submitSession; none diagnose.
 export const GAMES: GameDef[] = [
   { key: "cpt", title: "Sustained Focus", domain: "Attention", minutes: 4, mechanic: "CPT: respond to rare targets", evidence: "Conners CPT-3 / TOVA paradigm", href: "/assessment/cpt" },
-  { key: "gonogo", title: "Go / No-Go", domain: "Inhibition", minutes: 2, mechanic: "Respond to GO, withhold for STOP", evidence: "Motor inhibition standard", href: "/assessment/gonogo" },
+  { key: "shelf", title: "Remember the Shelf", domain: "Memory", minutes: 2, mechanic: "Memorize 6 objects in 20s, tap what was there — green = remembered, red = intruder", evidence: "Visual recognition memory", href: "/games/shelf" },
   { key: "stroop", title: "Color Clash", domain: "Inhibition", minutes: 3, mechanic: "Name ink color, ignore word", evidence: "Stroop effect", href: "/assessment/stroop" },
   { key: "flanker", title: "Flanker Field", domain: "Attention", minutes: 3, mechanic: "Respond to center arrow among flankers", evidence: "Eriksen flanker task", href: "/games/flanker" },
   { key: "sart", title: "Steady Response", domain: "Attention", minutes: 3, mechanic: "Go-heavy vigilance, withhold rare digit", evidence: "SART mind-wandering paradigm", href: "/games/sart" },

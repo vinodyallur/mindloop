@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
 import { GAMES } from "@/lib/games";
+import RequireProfile from "@/components/RequireProfile";
 
 export default function Assessment() {
   return (
+    <RequireProfile>
     <main className="mx-auto w-full max-w-[1400px] space-y-6 px-5 py-8">
       <header>
         <p className="text-xs font-medium uppercase tracking-widest text-[#a39c8c]">Assessment library</p>
@@ -24,5 +26,6 @@ export default function Assessment() {
         ))}
       </div>
     </main>
+    </RequireProfile>
   );
 }

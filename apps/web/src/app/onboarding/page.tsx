@@ -105,7 +105,7 @@ export default function Onboarding() {
           <div className="card p-6 text-center sm:p-8">
             <h1 className="text-3xl font-black tracking-tight">🎮 Your 4 baseline games</h1>
             <p className="mx-auto mt-2 max-w-md text-sm font-medium text-[#6b6257]">
-              These 4 were picked because together they cover <b>attention span</b>, <b>focus under boredom</b>, <b>working memory</b> and <b>mind-body coordination</b>.
+              These 4 were picked because together they cover <b>attention span</b>, <b>remembering what you see</b>, <b>working memory</b> and <b>mind-body coordination</b>.
               Play each once — that draws your starting line.
             </p>
           </div>
