@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const KEY = process.env.NEXT_PUBLIC_API_KEY || "demo-key-change-me";
+import { getStory } from "@/lib/api";
 
 const LEVEL_STYLE: Record<string, { bg: string; ink: string; emoji: string; label: string }> = {
   super: { bg: "#d3f5df", ink: "#14703a", emoji: "🌟", label: "Super!" },
@@ -18,13 +16,9 @@ export default function StoryReport() {
 
   async function generate() {
     setLoading(true); setErr("");
-    try {
-      const r = await fetch(`${API}/api/v1/reports/story`, { headers: { "x-api-key": KEY } });
-      if (!r.ok) throw new Error("backend offline");
-      setStory(await r.json());
-    } catch {
-      setErr("Backend offline — start the API, then try again.");
-    }
+    const s = await getStory();
+    if (!s) setErr("Couldn't load your story — play a game first, then try again.");
+    else setStory(s);
     setLoading(false);
   }
 

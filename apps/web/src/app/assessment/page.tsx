@@ -3,9 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { GAMES } from "@/lib/games";
 import RequireProfile from "@/components/RequireProfile";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const KEY = process.env.NEXT_PUBLIC_API_KEY || "demo-key-change-me";
+import { getAssessmentSet } from "@/lib/api";
 
 // Guided baseline flow: 4 unique games with Next/Skip on every step.
 const FLOW = [
@@ -20,10 +18,7 @@ export default function Assessment() {
   const [step, setStep] = useState(0);
 
   function refresh() {
-    fetch(`${API}/api/v1/baseline/assessment-set`, { headers: { "x-api-key": KEY } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setDone(d.items.filter((t: any) => t.done).map((t: any) => t.task_key)))
-      .catch(() => {});
+    getAssessmentSet().then((d) => d && setDone(d.items.filter((t: any) => t.done).map((t: any) => t.task_key)));
   }
   useEffect(() => {
     refresh();

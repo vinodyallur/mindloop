@@ -370,6 +370,10 @@ export const logScreenTime = (screen_minutes: number, doomscroll_minutes: number
   req("/api/v1/screentime", { method: "POST", body: JSON.stringify({ screen_minutes, doomscroll_minutes }) });
 export const getScreenTime = () => req("/api/v1/screentime/latest");
 export const getAssessmentSet = () => req("/api/v1/baseline/assessment-set");
+export const getBaselineIndex = (task_key = "", metric_key = "", window = 30) =>
+  req(`/api/v1/baseline/index?task_key=${task_key}&metric_key=${metric_key}&window=${window}`);
+export const getBaselineForecast = () => req("/api/v1/baseline/forecast");
+export const getStory = () => req("/api/v1/reports/story");
 export const getPlanToday = () => req("/api/v1/plan/today");
 export const completePlanItem = (item_key: string, result: Record<string, any> = {}) =>
   req("/api/v1/plan/complete", { method: "POST", body: JSON.stringify({ item_key, result }) });

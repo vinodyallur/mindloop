@@ -2,10 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceArea } from "recharts";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const KEY = process.env.NEXT_PUBLIC_API_KEY || "demo-key-change-me";
-const req = (p: string) => fetch(`${API}${p}`, { headers: { "x-api-key": KEY } }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+import { getBaselineIndex, getBaselineForecast, getAssessmentSet, getScreenTime } from "@/lib/api";
 
 function band(v: number) {
   if (v >= 70) return { label: "Above your usual", cls: "text-emerald-700" };
@@ -24,11 +21,10 @@ export default function Baseline() {
     try {
       if (new URLSearchParams(window.location.search).get("fresh") === "1") setFresh(true);
     } catch { /* no query */ }
-    const q = `?task_key=${task}&metric_key=${metric}&window=30`;
-    req(`/api/v1/baseline/index${q}`).then(setData);
-    req("/api/v1/baseline/forecast").then((f) => f && setData((d: any) => (d ? { ...d, forecast: f } : d)));
-    req("/api/v1/baseline/assessment-set").then(setAset);
-    req("/api/v1/screentime/latest").then((s) => s && setScreen(s));
+    getBaselineIndex(task, metric).then(setData);
+    getBaselineForecast().then((f) => f && setData((d: any) => (d ? { ...d, forecast: f } : d)));
+    getAssessmentSet().then(setAset);
+    getScreenTime().then((s) => s && setScreen(s));
   }, [task, metric]);
   const series = useMemo(() => (data?.series || []).map((s: any, i: number) => ({ i: i + 1, index: s.index, task: s.task_key })), [data]);
   const tasks = useMemo(() => Array.from(new Set((data?.series || []).map((s: any) => s.task_key as string))), [data]);
