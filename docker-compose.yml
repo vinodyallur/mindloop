@@ -1,0 +1,19 @@
+# One command: docker compose up --build
+# App: http://localhost:3000 · API: http://localhost:8000/health
+services:
+  mindloop:
+    build: .
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    environment:
+      MINDLOOP_API_KEY: ${MINDLOOP_API_KEY:-demo-key-change-me}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///./mindloop.db}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_API_KEY: ${MINDLOOP_API_KEY:-demo-key-change-me}
+    volumes:
+      - mindloop-data:/srv/api
+
+volumes:
+  mindloop-data:

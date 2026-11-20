@@ -38,6 +38,25 @@ and leave `NEXT_PUBLIC_DEMO_MODE` unset — then host the API below.
 **Web (Vercel):** same as Option B but with `NEXT_PUBLIC_API_URL` +
 `NEXT_PUBLIC_API_KEY` set (no demo mode).
 
+## Option D · Docker anywhere + AWS in one command
+
+```bash
+docker compose up --build
+# App: http://localhost:3000 · API: http://localhost:8000/health
+```
+
+The `Dockerfile` packs backend + frontend into **one image**; `docker-compose.yml`
+wires ports and a data volume. Override keys via env:
+`MINDLOOP_API_KEY`, `DATABASE_URL`, `CORS_ORIGINS`, `NEXT_PUBLIC_API_URL`.
+
+**AWS paths (same image, pick one):**
+- **App Runner (easiest):** ECR → App Runner → point at the image, port 3000.
+  Auto-builds from GitHub on push. ~$5/mo idle.
+- **ECS Fargate:** push to ECR → task definition (512MB/0.25vCPU is enough) →
+  ALB on 3000/8000. Postgres via RDS, set `DATABASE_URL`.
+- **EC2 (cheapest):** any `t3.micro` → install Docker → `docker compose up -d`.
+  Elastic IP + security group opening 3000/8000.
+
 ## After deploy
 
 - Open `/onboarding` on the live URL and complete the flow end-to-end.
